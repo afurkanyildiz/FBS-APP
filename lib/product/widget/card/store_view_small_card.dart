@@ -19,8 +19,8 @@ class SmallCardView extends StatelessWidget {
         child: Column(
           children: [
             Container(
-              width: context.dynamicHeight(.06),
-              height: context.dynamicHeight(.06),
+              width: MediaQuery.of(context).size.width * 0.16,
+              height: MediaQuery.of(context).size.width * 0.16,
               decoration: BoxDecoration(
                   color: ColorConstants.chipColor,
                   border: Border.all(width: 2, color: Color(0xffFF8527)),
@@ -32,14 +32,12 @@ class SmallCardView extends StatelessWidget {
               ),
             ),
             SizedBox(
-              height: context.dynamicHeight(.012),
+              height: MediaQuery.of(context).size.width * 0.01,
             ),
-            Expanded(
-              child: Text(
-                title,
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16),
-              ),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: TextStyle(),
             )
           ],
         ),
@@ -47,3 +45,26 @@ class SmallCardView extends StatelessWidget {
     );
   }
 }
+
+
+
+// Increase Product
+//  IconButton(
+//                             onPressed: () {
+//                               setState(() {
+//                                 if (widget.product.count > 0) {
+//                                   widget.product.count--;
+//                                 }
+//                               });
+//                             },
+//                             icon: Icon(Icons.remove),
+//                           ),
+//                           Text(widget.product.count.toString()),
+//                           IconButton(
+//                             onPressed: () {
+//                               setState(() {
+//                                 widget.product.count++;
+//                               });
+//                             },
+//                             icon: Icon(Icons.add),
+//                           ),
