@@ -1,5 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import '../models/user.dart';
 
 class AuthService {
@@ -13,7 +12,7 @@ class AuthService {
     }
   }
 
-  Future signInAnonim() async {
+  Future<dynamic> signInAnonim() async {
     try {
       UserCredential result = await _auth.signInAnonymously();
       User? user = result.user;
@@ -30,7 +29,7 @@ class AuthService {
     return _auth.authStateChanges().map(_firebaseComingUser);
   }
 
-  Future signOut() async {
+  Future<dynamic> signOut() async {
     try {
       return await _auth.signOut();
     } catch (e) {

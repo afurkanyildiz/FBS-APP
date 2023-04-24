@@ -1,6 +1,5 @@
 import 'package:firat_bilgisayar_sistemleri/feature/auth/sign_in.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class Authenticate extends StatefulWidget {
   const Authenticate({super.key});

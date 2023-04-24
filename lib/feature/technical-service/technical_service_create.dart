@@ -1,9 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:kartal/kartal.dart';
 
 import '../../product/constants/colors.dart';
-import '../../product/constants/padding.dart';
 
 class TechnicalServiceCreate extends StatefulWidget {
   const TechnicalServiceCreate({super.key});
@@ -13,7 +11,6 @@ class TechnicalServiceCreate extends StatefulWidget {
 }
 
 class _TechnicalServiceCreateState extends State<TechnicalServiceCreate> {
-  final _firestore = FirebaseFirestore.instance;
   TextEditingController usernameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController telephone_numberController = TextEditingController();
@@ -27,8 +24,6 @@ class _TechnicalServiceCreateState extends State<TechnicalServiceCreate> {
 
   @override
   Widget build(BuildContext context) {
-    CollectionReference technicalServices =
-        _firestore.collection('technical-service');
     return Scaffold(
       appBar: AppBar(
         title: Text(

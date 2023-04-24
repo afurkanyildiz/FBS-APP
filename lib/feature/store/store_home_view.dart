@@ -72,7 +72,6 @@ class _StoreViewState extends State<StoreView> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final maxWidth = size.width;
-    final maxHeight = size.height;
     return Scaffold(
       body: ListView(
         children: [

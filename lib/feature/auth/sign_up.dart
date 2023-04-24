@@ -3,7 +3,6 @@ import 'package:firat_bilgisayar_sistemleri/feature/home/home.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
 import '../../product/constants/colors.dart';
 
 class SignUp extends StatefulWidget {
@@ -71,6 +70,7 @@ class _SignUpState extends State<SignUp> {
                     print("Created New Account");
                     Navigator.push(
                         context,
+                        // ignore: inference_failure_on_instance_creation
                         MaterialPageRoute(
                             builder: (context) => OrientationPage()));
                   }).onError((error, stackTrace) {

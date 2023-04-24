@@ -68,7 +68,9 @@ class _SignInState extends ConsumerState<SignIn> {
                   email: _emailTextController.text,
                   password: _passwordTextController.text)
               .then((value) {
-            Navigator.pushReplacement(context,
+            Navigator.pushReplacement(
+                context,
+                // ignore: inference_failure_on_instance_creation
                 MaterialPageRoute(builder: (context) => OrientationPage()));
           }).onError((error, stackTrace) {
             print("Error ${error.toString()}");
@@ -88,7 +90,9 @@ class _SignInState extends ConsumerState<SignIn> {
         GestureDetector(
           onTap: () {
             Navigator.push(
-                context, MaterialPageRoute(builder: (context) => SignUp()));
+                context,
+                // ignore: inference_failure_on_instance_creation
+                MaterialPageRoute(builder: (context) => const SignUp()));
           },
           child: Text(
             " Kayıt Ol",

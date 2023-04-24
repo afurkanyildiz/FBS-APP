@@ -1,11 +1,8 @@
 import 'package:firat_bilgisayar_sistemleri/feature/home/home.dart';
-import 'package:firat_bilgisayar_sistemleri/feature/wrapper.dart';
 import 'package:firat_bilgisayar_sistemleri/product/constants/string.dart';
 import 'package:firat_bilgisayar_sistemleri/product/initialize/application_start.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import 'feature/store/store_home_view.dart';
 
 Future<void> main() async {
   await ApplicationStart.init();

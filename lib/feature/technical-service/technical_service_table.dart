@@ -24,7 +24,7 @@ class _TechnicalServiceTableState extends State<TechnicalServiceTable> {
         return TechnicalService().fromFirebase(snapshot);
       },
       toFirestore: (value, options) {
-        if (value == null) throw FirebaseCustomException('$value not null');
+        if (value == false) throw FirebaseCustomException('$value not null');
         return value.toJson();
       },
     ).get();
@@ -64,7 +64,7 @@ class _TechnicalServiceTableState extends State<TechnicalServiceTable> {
             case ConnectionState.done:
               if (snapshot.hasData) {
                 final values =
-                    snapshot.data!.docs.map((e) => e.data()).toList() ?? [];
+                    snapshot.data!.docs.map((e) => e.data()).toList();
                 return ListView.builder(
                   scrollDirection: Axis.vertical,
                   shrinkWrap: true,

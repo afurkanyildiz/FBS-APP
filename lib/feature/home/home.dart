@@ -1,7 +1,6 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:firat_bilgisayar_sistemleri/feature/store/store_home_view.dart';
 import 'package:flutter/material.dart';
-import 'package:kartal/kartal.dart';
 import '../../product/constants/colors.dart';
 import '../../product/constants/images.dart';
 import '../technical-service/technical_service_screen.dart';
@@ -15,7 +14,6 @@ class OrientationPage extends StatefulWidget {
 
 class _OrientationPageState extends State<OrientationPage>
     with NavigatorManager {
-  int _current = 0;
   List<Widget> generaImagesTiles() {
     return imageList
         .map((element) => ClipRRect(
@@ -146,7 +144,8 @@ class ButtonItems extends StatelessWidget with NavigatorManager {
 
 mixin NavigatorManager {
   void navigateToWidget(BuildContext context, Widget widget) {
-    Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+    // ignore: inference_failure_on_instance_creation
+    Navigator.push(context, MaterialPageRoute(builder: (context) {
       return widget;
     }));
   }
