@@ -51,5 +51,10 @@ flutter:
   assets:
       - assets/images/
       - assets/images/slider/
+      - assets/images/computer/
+      - assets/images/screen/
+      - assets/images/computer-case/
+      - assets/images/keyboard/
+      - assets/images/printer/
 
   

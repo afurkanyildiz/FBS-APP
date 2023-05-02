@@ -3,6 +3,7 @@ import 'package:firat_bilgisayar_sistemleri/feature/store/store_home_view.dart';
 import 'package:flutter/material.dart';
 import '../../product/constants/colors.dart';
 import '../../product/constants/images.dart';
+import '../store/store_screen_view.dart';
 import '../technical-service/technical_service_screen.dart';
 
 class OrientationPage extends StatefulWidget {
@@ -92,7 +93,7 @@ class ButtonItems extends StatelessWidget with NavigatorManager {
           flex: 18,
           child: ElevatedButton.icon(
             onPressed: () {
-              navigateToWidget(context, StoreView());
+              navigateToWidget(context, StoreScreenView());
             },
             icon: Icon(Icons.store, size: 40.0),
             label: Text(

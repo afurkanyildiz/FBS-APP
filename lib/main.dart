@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
     // return StreamProvider<Users?>.value(
     //   value: AuthService().user,
     //   initialData: null,
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: StringConstants.appName,
       home: OrientationPage(),

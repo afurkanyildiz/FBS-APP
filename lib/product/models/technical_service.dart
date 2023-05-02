@@ -16,6 +16,7 @@ class TechnicalService extends Equatable
     this.address,
     this.complaint,
     this.state,
+    this.userID,
     this.id,
   });
 
@@ -30,6 +31,7 @@ class TechnicalService extends Equatable
   final String? address;
   final String? complaint;
   final String? state;
+  final String? userID;
   @override
   final String? id;
 
@@ -46,6 +48,7 @@ class TechnicalService extends Equatable
         address,
         complaint,
         state,
+        userID,
         id
       ];
 
@@ -61,6 +64,7 @@ class TechnicalService extends Equatable
     String? address,
     String? complaint,
     String? state,
+    String? userID,
     String? id,
   }) {
     return TechnicalService(
@@ -75,6 +79,7 @@ class TechnicalService extends Equatable
       address: address ?? this.address,
       complaint: complaint ?? this.complaint,
       state: state ?? this.state,
+      userID: userID ?? this.userID,
       id: id ?? this.id,
     );
   }
@@ -92,6 +97,7 @@ class TechnicalService extends Equatable
       'address': address,
       'complaint': complaint,
       'state': state,
+      'userID': userID,
       'id': id,
     };
   }
@@ -110,6 +116,7 @@ class TechnicalService extends Equatable
       address: json['address'] as String?,
       complaint: json['complaint'] as String?,
       state: json['state'] as String?,
+      userID: json['userID'] as String?,
       id: json['id'] as String?,
     );
   }
