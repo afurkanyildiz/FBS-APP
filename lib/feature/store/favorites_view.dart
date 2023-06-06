@@ -190,6 +190,7 @@ class _FavoritesWiewState extends State<FavoritesWiew> {
               'sepeteEkle:${Provider.of<Cart>(context, listen: false).items.length}');
           print(user);
         }
+        // ignore: inference_failure_on_untyped_parameter
       }).catchError((error) {
         print('Hata: $error');
       });
