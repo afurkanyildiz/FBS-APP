@@ -1,5 +1,4 @@
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:firat_bilgisayar_sistemleri/feature/store/store_home_view.dart';
 import 'package:flutter/material.dart';
 import '../../product/constants/colors.dart';
 import '../../product/constants/images.dart';

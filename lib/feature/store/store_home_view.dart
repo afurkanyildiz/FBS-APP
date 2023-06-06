@@ -1,30 +1,21 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:kartal/kartal.dart';
-
+import 'package:firat_bilgisayar_sistemleri/product/models/products_model.dart';
+import 'package:firat_bilgisayar_sistemleri/product/utility/exception/custom_exception.dart';
+import 'package:firat_bilgisayar_sistemleri/product/widget/text/title_text.dart';
+import 'package:provider/provider.dart';
 import 'package:firat_bilgisayar_sistemleri/product/constants/colors.dart';
 import 'package:firat_bilgisayar_sistemleri/product/constants/string.dart';
 import 'package:firat_bilgisayar_sistemleri/product/widget/text/small_title_text.dart';
 import 'package:firat_bilgisayar_sistemleri/product/widget/text/subtitle_text.dart';
-
 import '../../product/constants/padding.dart';
+
+import '../../product/service/cart.dart';
+
 import '../../product/widget/card/store_view_small_card.dart';
-import '../../product/widget/text/title_text.dart';
-
-class Product {
-  final String name;
-  final String explanation;
-  final String imagePath;
-  final double price;
-  int count = 0;
-
-  Product(
-      {required this.name,
-      required this.explanation,
-      required this.price,
-      required this.imagePath});
-}
 
 class StoreView extends StatefulWidget {
   const StoreView({
@@ -36,134 +27,156 @@ class StoreView extends StatefulWidget {
 }
 
 class _StoreViewState extends State<StoreView> {
-  List<Product> products = [
-    Product(
-        name: 'Monster',
-        explanation:
-            'Monster Abra A5 V16.7.3 Intel Core I5-11400h 16gb Ram 500gb Ssd 4gb Gtx1650 Freedos 15.6" Fhd 144hz ABRA A5 V16.7.3',
-        imagePath: 'assets/images/computer/computer.png',
-        price: 26.299),
-    Product(
-        name: 'Apple',
-        explanation: 'Apple Macbook Air 13'
-            ' M1 8gb 256gb Ssd Uzay Grisi Dizüstü Bilgisayar MGN63TU/A',
-        imagePath: 'assets/images/computer/macbook.png',
-        price: 18.049),
-    Product(
-        name: 'Monster',
-        explanation:
-            'Monster Abra A5 V17.4.6 Intel Core I7 11800h 16gb Ram 1 Tb Ssd Rtx 3060 Freedos 15,6 Inç Fhd 144 Hz ABRA A5 V17.4.6',
-        imagePath: 'assets/images/computer/computer.png',
-        price: 25.999),
-    Product(
-        name: 'Monster',
-        explanation:
-            'Monster Abra A7 V12.5.3 Intel Core I5-11400h 16gb Ram 500gb Ssd 4gb Gtx1650 Freedos 17.3" Fhd 144hz ABRA A7 V12.5.3',
-        imagePath: 'assets/images/computer/computer.png',
-        price: 17.199),
-    Product(
-        name: 'Apple',
-        explanation:
-            'Apple Macbook Air M2 Çip 16 Gb 512 Gb Ssd 13.6" Yıldız Işığı Notebook Z15z000k6 125034737',
-        imagePath: 'assets/images/computer/macbook.png',
-        price: 33.999),
-    Product(
-        name: 'GAMEFORCE',
-        explanation:
-            'GAMEFORCE Glass 6x120mm Rainbow Fanlı Oyuncu Kasası GLASSRAINBOW6',
-        imagePath: 'assets/images/computer-case/kasa-1.png',
-        price: 1.099),
-    Product(
-        name: 'ASUS',
-        explanation:
-            'Tuf Gamıng Gt301 Adreslenebilir Rgb Fanlı Temperli Cam Usb 3.1 Vga Tutucu Yok Atx Oyuncu Kasası 90DC0040-B49000',
-        imagePath: 'assets/images/computer-case/kasa-2.png',
-        price: 33.999),
-    Product(
-        name: 'MICROCASE',
-        explanation:
-            'Microcase Al3048 Tablet Telefon Bilgisayar Için Yuvarlak Tuşlu Bluetooth Kablosuz Klavye - Siyah CDGJKPUZ',
-        imagePath: 'assets/images/keyboard/klavye-1.png',
-        price: 26.000),
-    Product(
-        name: 'TechGo',
-        explanation:
-            'Apple Touch Id Özellikli Ve Sayısal Tuş Takımlı Magic Keyboard: Bluetooth, Şarj Edilebilir. Apple Çi MRS-23376',
-        imagePath: 'assets/images/keyboard/klavye-2.png',
-        price: 7.309),
-    Product(
-        name: 'Canon',
-        explanation:
-            'Canon E3440 Renkli Inkjet Wifi Siyah Mürekkep Püskürtmeli Yazıcı (Canon Eurasia Garantili) CANON E3440',
-        imagePath: 'assets/images/printer/yazici-1.png',
-        price: 1.598),
-    Product(
-        name: 'HP',
-        explanation: 'HP Smart Tank 515 Wireless All In One Yazıcı 1TJ09A',
-        imagePath: 'assets/images/printer/yazici-2.png',
-        price: 3.899),
-    Product(
-        name: 'ASUS',
-        explanation:
-            'ASUS TUF Gaming VG27VQ 27" 165 Hz 1ms (HDMI+Display+DVI-D) FreeSync Full HD Curved Monitör CE261ASU145',
-        imagePath: 'assets/images/screen/monitor-1.png',
-        price: 4.999),
-  ];
-
   @override
   Widget build(BuildContext context) {
-    List<Product> expensiveProduct =
-        products.where((product) => product.price < 25.000).toList();
+    CollectionReference products =
+        FirebaseFirestore.instance.collection('products');
+
+    final response = products.withConverter(fromFirestore: (snapshot, options) {
+      final data = snapshot.data()!;
+      return Products(
+              stock: data['stock'] == null
+                  ? 0
+                  : int.tryParse(data['stock'].toString())!)
+          .fromFirebase(snapshot);
+    }, toFirestore: (value, options) {
+      if (value == false) throw FirebaseCustomException('$value not null');
+      return value.toJson();
+    }).get();
+    // List<Product> expensiveProduct =
+    //     products.where((product) => product.price < 25.000).toList();
     final size = MediaQuery.of(context).size;
     final maxWidth = size.width;
+    final maxHeight = size.height;
     return Scaffold(
-      body: ListView(
-        children: [
-          _Header(),
-          _CampaignView(),
-          _ChipView(),
-          _SpecialForYouTitleWiew(),
-          Container(
-            height: MediaQuery.of(context).size.height * 0.36,
-            child: ListView.builder(
-              itemCount: 3,
-              scrollDirection: Axis.horizontal,
-              itemBuilder: (BuildContext context, int index) {
-                return _SpecialForYouWiew(
-                  maxWidth: maxWidth,
-                  product: products[index],
-                );
-              },
+      appBar: AppBar(
+        title: TitleText(value: 'Ana Sayfa'),
+        centerTitle: false,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+              iconSize: maxHeight * 0.03,
+              onPressed: () {},
+              icon: Icon(
+                Icons.notifications_none_outlined,
+                color: Colors.black,
+              )),
+          Padding(
+            padding: EdgeInsets.only(right: maxWidth * 0.02),
+            child: CircleAvatar(
+              radius: MediaQuery.of(context).size.height * 0.03,
+              backgroundColor: ColorConstants.technicalServiceIcon,
+              child: Icon(
+                Icons.person,
+                color: Colors.white,
+                size: MediaQuery.of(context).size.height * 0.03,
+              ),
             ),
           ),
-          _PopularProductsTitleView(),
-          Container(
-            height: MediaQuery.of(context).size.height * 0.36,
-            child: ListView.builder(
-              itemCount: expensiveProduct.length,
-              scrollDirection: Axis.horizontal,
-              itemBuilder: (BuildContext context, int index) {
-                return _PopularProductsListView(
-                  maxWidth: maxWidth,
-                  products: expensiveProduct[index],
-                );
-              },
-            ),
-          ),
-          // GridView.builder(
-          //     itemCount: (products.length / 2).ceil(),
-          //     shrinkWrap: true,
-          //     gridDelegate:
-          //         SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-          //     itemBuilder: (BuildContext context, int index) {
-          //       return _PopularProductsListView(
-          //         products: products[index],
-          //         maxWidth: maxWidth,
-          //       );
-          //     })
         ],
       ),
+      body: FutureBuilder(
+        future: response,
+        builder: (BuildContext context,
+            AsyncSnapshot<QuerySnapshot<Products?>> snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.none:
+              return Placeholder();
+            case ConnectionState.waiting:
+            case ConnectionState.active:
+              return LinearProgressIndicator();
+            case ConnectionState.done:
+              if (snapshot.hasData) {
+                final values =
+                    snapshot.data!.docs.map((e) => e.data()).toList();
+                return Container(
+                  height: maxHeight - kToolbarHeight,
+                  width: maxWidth,
+                  padding: context.horizontalPaddingLow,
+                  child: ListView(children: [
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          height: maxHeight * 0.02,
+                        ),
+                        _CampaignView(),
+                        SizedBox(
+                          height: maxHeight * 0.01,
+                        ),
+                        _ChipView(),
+                        _SpecialForYouTitleWiew(),
+                        Container(
+                          height: maxHeight * 0.36,
+                          child: ListView.builder(
+                            itemCount: 3,
+                            scrollDirection: Axis.horizontal,
+                            itemBuilder: (BuildContext context, int index) {
+                              return _SpecialForYouWiew(
+                                maxWidth: maxWidth,
+                                maxHeight: maxHeight,
+                                products: values[index],
+                              );
+                            },
+                          ),
+                        ),
+                        _PopularProductsTitleView(),
+                        Container(
+                          height: maxHeight * 0.36,
+                          child: ListView.builder(
+                            itemCount: values.length,
+                            scrollDirection: Axis.horizontal,
+                            itemBuilder: (BuildContext context, int index) {
+                              return _PopularProductsListView(
+                                maxWidth: maxWidth,
+                                maxHeight: maxHeight,
+                                products: values[index],
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ]),
+                );
+              } else {
+                return SizedBox();
+              }
+          }
+        },
+      ),
     );
+  }
+
+  void sepeteEkle(String? productId) async {
+    var user = FirebaseAuth.instance.currentUser;
+
+    if (user != null && productId != null) {
+      await FirebaseFirestore.instance
+          .collection('products')
+          .doc(productId)
+          .get()
+          .then((snapshot) {
+        if (snapshot.exists) {
+          final productData = snapshot.data() as Map<String, dynamic>;
+          final product = Products(
+            stock: productData['stock'] == null
+                ? 0
+                : int.tryParse(productData['stock'].toString())!,
+          ).fromJson(productData); // Düzeltme burada
+          final cartItem = CartItem(product: product, quantity: 1);
+          Provider.of<Cart>(context, listen: false).addToCart(cartItem);
+          print(
+              'sepeteEkle:${Provider.of<Cart>(context, listen: false).items.length}');
+          print(user);
+        }
+      }).catchError((error) {
+        print('Hata: $error');
+      });
+    }
   }
 }
 
@@ -175,7 +188,8 @@ class _CampaignView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: context.dynamicHeight(.14),
+      width: MediaQuery.of(context).size.width * 1,
+      height: MediaQuery.of(context).size.height * 0.12,
       child: Padding(
         padding: listPaddingHorizontal,
         child: Card(
@@ -192,7 +206,7 @@ class _CampaignView extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SubTitleWhiteText(value: "Haftanın Kampanyası"),
-                TitleWhiteText(value: "%25 İndirim!"),
+                Center(child: TitleWhiteText(value: "%25 İndirim!")),
               ],
             ),
           ),
@@ -210,7 +224,7 @@ class _ChipView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.18,
+      height: MediaQuery.of(context).size.height * 0.17,
       child: ListView(
         scrollDirection: Axis.horizontal,
         children: const [
@@ -270,18 +284,27 @@ class _SpecialForYouTitleWiew extends StatelessWidget {
 }
 
 class _SpecialForYouWiew extends StatefulWidget {
-  final Product product;
   final double maxWidth;
+  final double maxHeight;
+  final Products? products;
 
-  const _SpecialForYouWiew(
-      {Key? key, required this.maxWidth, required this.product})
-      : super(key: key);
+  const _SpecialForYouWiew({
+    Key? key,
+    required this.maxWidth,
+    required this.maxHeight,
+    required this.products,
+  }) : super(key: key);
 
   @override
   State<_SpecialForYouWiew> createState() => _SpecialForYouWiewState();
 }
 
 class _SpecialForYouWiewState extends State<_SpecialForYouWiew> {
+  void onPressed() {
+    final parentState = context.findAncestorStateOfType<_StoreViewState>();
+    parentState?.sepeteEkle(widget.products?.id);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -294,14 +317,13 @@ class _SpecialForYouWiewState extends State<_SpecialForYouWiew> {
         child: Column(
           children: [
             Expanded(
-              flex: 1,
               child: AspectRatio(
-                aspectRatio: 12 / 8,
+                aspectRatio: widget.maxWidth < 380 ? 12 / 10 : 12 / 8,
                 child: Padding(
                   padding: context.paddingLow,
-                  child: Image.asset(
-                    widget.product.imagePath,
-                    fit: BoxFit.cover,
+                  child: Image.network(
+                    widget.products?.imagePath ?? '',
+                    fit: BoxFit.contain,
                   ),
                 ),
               ),
@@ -311,37 +333,41 @@ class _SpecialForYouWiewState extends State<_SpecialForYouWiew> {
               child: Padding(
                 padding: EdgeInsets.all(16.0),
                 child: Container(
-                  width: MediaQuery.of(context).size.width * 0.44,
+                  width: widget.maxHeight * 0.25,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        widget.product.name.toString(),
+                        widget.products?.productName ?? '',
                         style: TextStyle(
-                            fontSize: widget.maxWidth < 380 ? 16.0 : 24.0,
+                            fontSize: widget.maxHeight * 0.03,
                             fontWeight: FontWeight.bold),
                       ),
                       SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.02,
+                        height: widget.maxHeight * 0.02,
                       ),
                       Text(
-                        widget.product.explanation.toString(),
+                        widget.products?.productExplanation ?? '',
                         overflow: TextOverflow.clip,
                         maxLines: widget.maxWidth < 380 ? 2 : 3,
-                        softWrap: widget.maxWidth < 350 ? false : true,
+                        softWrap: widget.maxWidth < 380 ? false : true,
                         style: TextStyle(
-                            fontSize: widget.maxWidth < 380 ? 14.0 : 16.0,
+                            fontSize: widget.maxHeight * 0.02,
                             fontWeight: FontWeight.normal),
                       ),
                       SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.02,
+                        height: widget.maxHeight * 0.01,
                       ),
                       Row(
-                        mainAxisSize: MainAxisSize.min,
                         children: [
                           OutlinedButton(
-                            onPressed: () {},
-                            child: Text('Sepete Ekle'),
+                            onPressed: () {
+                              onPressed();
+                            },
+                            child: Text('Sepete Ekle',
+                                style: TextStyle(
+                                    fontSize: widget.maxHeight * 0.02),
+                                textAlign: TextAlign.center),
                             style: ButtonStyle(
                               foregroundColor: MaterialStateProperty.all(
                                   ColorConstants.textfieldWhite),
@@ -352,16 +378,13 @@ class _SpecialForYouWiewState extends State<_SpecialForYouWiew> {
                             ),
                           ),
                           SizedBox(
-                              width: MediaQuery.of(context).size.height * 0.01),
-                          Expanded(
-                            // child: Text(
-                            //   '\$${(widget.product.price * widget.product.count).toStringAsFixed(2)} ₺',
-                            //   style: TextStyle(fontWeight: FontWeight.bold),
-                            // ),
-                            child: Text(
-                              '${(widget.product.price).toStringAsFixed(3)} ₺',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
+                              width:
+                                  MediaQuery.of(context).size.height * 0.015),
+                          Text(
+                            '${(widget.products?.price)?.toStringAsFixed(3)} ₺',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: widget.maxHeight * 0.015),
                           )
                         ],
                       )
@@ -406,15 +429,28 @@ class _PopularProductsTitleView extends StatelessWidget {
   }
 }
 
-class _PopularProductsListView extends StatelessWidget {
-  final Product products;
+class _PopularProductsListView extends StatefulWidget {
   final double maxWidth;
+  final double maxHeight;
+  final Products? products;
 
   const _PopularProductsListView({
     Key? key,
-    required this.products,
     required this.maxWidth,
+    required this.maxHeight,
+    required this.products,
   }) : super(key: key);
+
+  @override
+  State<_PopularProductsListView> createState() =>
+      _PopularProductsListViewState();
+}
+
+class _PopularProductsListViewState extends State<_PopularProductsListView> {
+  void onPressed() {
+    final parentState = context.findAncestorStateOfType<_StoreViewState>();
+    parentState?.sepeteEkle(widget.products?.id);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -428,14 +464,13 @@ class _PopularProductsListView extends StatelessWidget {
         child: Column(
           children: [
             Expanded(
-              flex: 1,
               child: AspectRatio(
-                aspectRatio: 12 / 8,
+                aspectRatio: widget.maxWidth < 380 ? 12 / 10 : 12 / 8,
                 child: Padding(
                   padding: context.paddingLow,
-                  child: Image.asset(
-                    products.imagePath,
-                    fit: BoxFit.cover,
+                  child: Image.network(
+                    widget.products?.imagePath ?? '',
+                    fit: BoxFit.contain,
                   ),
                 ),
               ),
@@ -445,37 +480,42 @@ class _PopularProductsListView extends StatelessWidget {
               child: Padding(
                 padding: EdgeInsets.all(16.0),
                 child: Container(
-                  width: MediaQuery.of(context).size.width * 0.44,
+                  width: widget.maxHeight * 0.25,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        products.name.toString(),
+                        widget.products?.productName ?? '',
                         style: TextStyle(
-                            fontSize: maxWidth < 380 ? 16.0 : 24.0,
+                            fontSize: widget.maxHeight * 0.03,
                             fontWeight: FontWeight.bold),
                       ),
                       SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.02,
+                        height: widget.maxHeight * 0.02,
                       ),
                       Text(
-                        products.explanation.toString(),
+                        widget.products?.productExplanation ?? '',
                         overflow: TextOverflow.clip,
-                        maxLines: maxWidth < 380 ? 2 : 3,
-                        softWrap: maxWidth < 350 ? false : true,
+                        maxLines: widget.maxWidth < 380 ? 1 : 2,
+                        softWrap: widget.maxWidth < 380 ? false : true,
                         style: TextStyle(
-                            fontSize: maxWidth < 380 ? 14.0 : 16.0,
+                            fontSize: widget.maxHeight * 0.02,
                             fontWeight: FontWeight.normal),
                       ),
                       SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.02,
+                        height: widget.maxHeight * 0.01,
                       ),
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           OutlinedButton(
-                            onPressed: () {},
-                            child: Text('Sepete Ekle'),
+                            onPressed: () {
+                              onPressed();
+                            },
+                            child: Text('Sepete Ekle',
+                                style: TextStyle(
+                                    fontSize: widget.maxHeight * 0.02),
+                                textAlign: TextAlign.center),
                             style: ButtonStyle(
                               foregroundColor: MaterialStateProperty.all(
                                   ColorConstants.textfieldWhite),
@@ -488,13 +528,11 @@ class _PopularProductsListView extends StatelessWidget {
                           SizedBox(
                               width: MediaQuery.of(context).size.height * 0.01),
                           Expanded(
-                            // child: Text(
-                            //   '\$${(widget.product.price * widget.product.count).toStringAsFixed(2)} ₺',
-                            //   style: TextStyle(fontWeight: FontWeight.bold),
-                            // ),
                             child: Text(
-                              '${(products.price).toStringAsFixed(3)} ₺',
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                              '${(widget.products?.price)?.toStringAsFixed(3)} ₺',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: widget.maxHeight * 0.015),
                             ),
                           )
                         ],
@@ -507,71 +545,6 @@ class _PopularProductsListView extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _Header extends StatelessWidget {
-  const _Header({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: context.onlyBottomPaddingMedium,
-      child: Row(
-        children: [
-          Spacer(),
-          _Title(),
-          Spacer(
-            flex: 8,
-          ),
-          _ShopCartIcon(),
-          _NotificationsIcon(),
-          Spacer()
-        ],
-      ),
-    );
-  }
-}
-
-class _NotificationsIcon extends StatelessWidget {
-  const _NotificationsIcon({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-        onPressed: () {}, icon: Icon(Icons.notifications_none_outlined));
-  }
-}
-
-class _ShopCartIcon extends StatelessWidget {
-  const _ShopCartIcon({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-        onPressed: () {},
-        icon: Icon(
-          Icons.shopping_cart_outlined,
-        ));
-  }
-}
-
-class _Title extends StatelessWidget {
-  const _Title({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return TitleText(
-      value: StringConstants.homePage,
     );
   }
 }

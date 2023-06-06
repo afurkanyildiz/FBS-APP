@@ -1,12 +1,15 @@
 import 'package:firat_bilgisayar_sistemleri/feature/home/home.dart';
 import 'package:firat_bilgisayar_sistemleri/product/constants/string.dart';
 import 'package:firat_bilgisayar_sistemleri/product/initialize/application_start.dart';
+import 'package:firat_bilgisayar_sistemleri/product/service/cart.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
 
-Future<void> main() async {
+void main() async {
   await ApplicationStart.init();
-  runApp(const ProviderScope(child: MyApp()));
+  runApp(MultiProvider(
+      providers: [ChangeNotifierProvider<Cart>(create: (_) => Cart())],
+      child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {

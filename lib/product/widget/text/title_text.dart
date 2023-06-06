@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:kartal/kartal.dart';
 
 class TitleText extends StatelessWidget {
   const TitleText({required this.value, super.key});
@@ -11,8 +10,10 @@ class TitleText extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       value,
-      style: context.textTheme.headlineLarge
-          ?.copyWith(fontWeight: FontWeight.w900, color: Colors.black),
+      style: TextStyle(
+          fontSize: MediaQuery.of(context).size.height * 0.05,
+          fontWeight: FontWeight.bold,
+          color: Colors.black),
     );
   }
 }
@@ -26,8 +27,27 @@ class TitleWhiteText extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       value,
-      style: context.textTheme.headlineMedium
-          ?.copyWith(fontWeight: FontWeight.w900, color: Colors.white),
+      style: TextStyle(
+          fontSize: MediaQuery.of(context).size.height * 0.04,
+          color: Colors.white,
+          fontWeight: FontWeight.bold),
+    );
+  }
+}
+
+class FavoriteTitleText extends StatelessWidget {
+  const FavoriteTitleText({required this.value, super.key});
+
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      value,
+      style: TextStyle(
+          fontSize: MediaQuery.of(context).size.height * 0.03,
+          fontWeight: FontWeight.bold,
+          color: Colors.black),
     );
   }
 }

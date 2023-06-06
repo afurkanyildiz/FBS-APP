@@ -1,6 +1,12 @@
+import 'package:firat_bilgisayar_sistemleri/feature/store/shopping_cart_wiev.dart';
+import 'package:firat_bilgisayar_sistemleri/feature/store/store_category_view.dart';
 import 'package:firat_bilgisayar_sistemleri/feature/store/store_home_view.dart';
 import 'package:firat_bilgisayar_sistemleri/product/constants/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../../product/service/cart.dart';
+import 'favorites_view.dart';
 
 class StoreScreenView extends StatefulWidget {
   const StoreScreenView({super.key});
@@ -10,17 +16,21 @@ class StoreScreenView extends StatefulWidget {
 }
 
 class _StoreScreenViewState extends State<StoreScreenView> {
+  final Cart cart = Cart();
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 4,
-      child: StoreScaffoldView(),
+    return ChangeNotifierProvider.value(
+      value: cart,
+      child: DefaultTabController(
+        length: 4,
+        child: StoreScaffoldView(),
+      ),
     );
   }
 }
 
 class StoreScaffoldView extends StatelessWidget {
-  const StoreScaffoldView({
+  StoreScaffoldView({
     super.key,
   });
 
@@ -30,8 +40,12 @@ class StoreScaffoldView extends StatelessWidget {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: StoreFloatingActionButtonView(),
       bottomNavigationBar: StoreBottomAppBarView(),
-      body: TabBarView(
-          children: [StoreView(), StoreView(), StoreView(), StoreView()]),
+      body: TabBarView(children: [
+        StoreView(),
+        CategoryView(),
+        FavoritesWiew(),
+        ShoppingCartScreen()
+      ]),
     );
   }
 }
@@ -47,20 +61,38 @@ class StoreBottomAppBarView extends StatelessWidget {
       surfaceTintColor: ColorConstants.colorsBlack,
       notchMargin: 10,
       shape: CircularNotchedRectangle(),
-      child: TabBar(tabs: [
+      child: TabBar(indicatorSize: TabBarIndicatorSize.label, tabs: [
         Tab(
-          icon: Icon(Icons.home, color: ColorConstants.technicalServiceIcon),
+          height: MediaQuery.of(context).size.height * 0.05,
+          icon: Icon(
+            Icons.home,
+            color: ColorConstants.technicalServiceIcon,
+            size: MediaQuery.of(context).size.height * 0.03,
+          ),
         ),
         Tab(
-          icon: Icon(Icons.search, color: ColorConstants.technicalServiceIcon),
+          height: MediaQuery.of(context).size.height * 0.05,
+          icon: Icon(
+            Icons.search,
+            color: ColorConstants.technicalServiceIcon,
+            size: MediaQuery.of(context).size.height * 0.03,
+          ),
         ),
         Tab(
-          icon:
-              Icon(Icons.favorite, color: ColorConstants.technicalServiceIcon),
+          height: MediaQuery.of(context).size.height * 0.05,
+          icon: Icon(
+            Icons.favorite,
+            color: ColorConstants.technicalServiceIcon,
+            size: MediaQuery.of(context).size.height * 0.03,
+          ),
         ),
         Tab(
-          icon: Icon(Icons.account_box_rounded,
-              color: ColorConstants.technicalServiceIcon),
+          height: MediaQuery.of(context).size.height * 0.05,
+          icon: Icon(
+            Icons.shopping_cart,
+            color: ColorConstants.technicalServiceIcon,
+            size: MediaQuery.of(context).size.height * 0.03,
+          ),
         ),
       ]),
     );
@@ -78,6 +110,15 @@ class StoreFloatingActionButtonView extends StatelessWidget {
       onPressed: () => Navigator.pop(context),
       backgroundColor: ColorConstants.technicalServiceIcon,
       child: Icon(Icons.view_stream),
+      shape: CircleBorder(),
+      heroTag: null,
+      clipBehavior: Clip.none,
+      materialTapTargetSize: MaterialTapTargetSize.padded,
+      elevation: 4.0,
+      highlightElevation: 8.0,
+      hoverElevation: 8.0,
+      focusElevation: 8.0,
+      disabledElevation: 0.0,
     );
   }
 }
