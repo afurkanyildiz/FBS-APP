@@ -1,17 +1,49 @@
 import 'package:flutter/material.dart';
 import 'package:kartal/kartal.dart';
-
-import '../../product/constants/colors.dart';
-import '../../product/service/cart.dart';
 import 'package:provider/provider.dart';
 
+import '../../product/constants/colors.dart';
+import '../../product/models/products_model.dart';
+import '../../product/service/cart.dart';
 import '../../product/widget/text/title_text.dart';
 
-class ShoppingCartScreen extends StatelessWidget {
+class ShoppingCartScreen extends StatefulWidget {
   const ShoppingCartScreen({Key? key}) : super(key: key);
 
   @override
+  State<ShoppingCartScreen> createState() => _ShoppingCartScreenState();
+}
+
+class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
+  List<Map<String, dynamic>> cartItems = [];
+
+  // @override
+  // void didChangeDependencies() {
+  //   // TODO: implement didChangeDependencies
+  //   final cart = Provider.of<Cart>(context);
+  //   cart.addListener(() {
+  //     setState(() {
+  //       // Update the UI to reflect the changes to the cart.
+  //       cartItems = cart.items.map((cartItem) {
+  //         final product = cartItem.product;
+
+  //         return {
+  //           'productName': product.productName,
+  //           'price': product.price,
+  //           'quantity': cartItem.quantity,
+  //         };
+  //       }).toList();
+  //     });
+  //   });
+  // }
+
+  @override
   Widget build(BuildContext context) {
+    final Cart cart = Provider.of<Cart>(context);
+    void addToCartButtonPressed(Products products) {
+      cart.removeFromCart(products);
+    }
+
     final size = MediaQuery.of(context).size;
     final maxWidth = size.width;
     final maxHeight = size.height;
@@ -51,7 +83,9 @@ class ShoppingCartScreen extends StatelessWidget {
           return ListView.builder(
             itemCount: cart.items.length,
             itemBuilder: (BuildContext context, int index) {
-              final product = cart.items[index].product;
+              final cartItem = cart.items[index];
+              final product = cartItem.product;
+
               return Padding(
                 padding: context.onlyTopPaddingLow,
                 child: Card(
@@ -70,10 +104,21 @@ class ShoppingCartScreen extends StatelessWidget {
                           width: maxWidth < 400
                               ? maxWidth * 0.20
                               : maxWidth * 0.25,
-                          child: Image.network(
-                            product.imagePath.toString(),
-                            fit: BoxFit.contain,
-                          ),
+                          child: product.imagePaths != null &&
+                                  product.imagePaths!.isNotEmpty
+                              ? Image.network(
+                                  product
+                                      .imagePaths![0], // İlk resmi gösteriyoruz
+                                  fit: BoxFit.contain,
+                                  loadingBuilder:
+                                      (context, child, loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return Center(
+                                      child: CircularProgressIndicator(),
+                                    );
+                                  },
+                                )
+                              : Container(),
                         ),
                         SizedBox(width: maxWidth * .03),
                         Container(
@@ -82,7 +127,7 @@ class ShoppingCartScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                product.productName.toString(),
+                                product.productName ?? '',
                                 style: TextStyle(
                                   fontSize: maxWidth * 0.05,
                                   fontWeight: FontWeight.bold,
@@ -96,9 +141,8 @@ class ShoppingCartScreen extends StatelessWidget {
                                 children: [
                                   IconButton(
                                     onPressed: () {
-                                      if (cart.items[index].quantity > 1) {
-                                        cart.decreaseQuantity(
-                                            cart.items[index]);
+                                      if (cartItem.quantity > 1) {
+                                        cart.decreaseQuantity(cartItem);
                                       }
                                     },
                                     icon: Icon(
@@ -109,7 +153,7 @@ class ShoppingCartScreen extends StatelessWidget {
                                     ),
                                   ),
                                   Text(
-                                    cart.items[index].quantity.toString(),
+                                    cartItem.quantity.toString(),
                                     style: TextStyle(
                                       fontSize: maxWidth < 500
                                           ? maxWidth * 0.035
@@ -118,10 +162,8 @@ class ShoppingCartScreen extends StatelessWidget {
                                   ),
                                   IconButton(
                                     onPressed: () {
-                                      if (cart.items[index].quantity <
-                                          cart.items[index].stock) {
-                                        cart.increaseQuantity(
-                                            cart.items[index]);
+                                      if (cartItem.quantity < cartItem.stock) {
+                                        cart.increaseQuantity(cartItem);
                                       }
                                     },
                                     icon: Icon(
@@ -145,9 +187,7 @@ class ShoppingCartScreen extends StatelessWidget {
                           width: maxWidth * 0.15,
                           child: IconButton(
                             onPressed: () {
-                              if (index >= 0 && index < cart.items.length) {
-                                cart.removeFromCart(cart.items[index].product);
-                              }
+                              addToCartButtonPressed(product);
                             },
                             icon: Icon(
                               Icons.delete_outline,
@@ -178,16 +218,19 @@ class ShoppingCartScreen extends StatelessWidget {
                     style: TextStyle(fontSize: maxHeight * .025),
                   ),
                   trailing: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      // Satın alma işlemleri gerçekleştirilebilir
+                    },
                     child: Text(
                       "Satın Al",
                       style: TextStyle(fontSize: maxWidth * .028),
                     ),
                     style: ButtonStyle(
-                        fixedSize: MaterialStateProperty.all(
-                            Size.fromHeight(maxHeight * .03)),
-                        backgroundColor: MaterialStateProperty.all(
-                            ColorConstants.mainbackgroundlinear1)),
+                      fixedSize: MaterialStateProperty.all(
+                          Size.fromHeight(maxHeight * .03)),
+                      backgroundColor: MaterialStateProperty.all(
+                          ColorConstants.mainbackgroundlinear1),
+                    ),
                   ),
                 );
               },

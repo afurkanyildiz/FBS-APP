@@ -5,7 +5,8 @@ class Products extends Equatable with IdModel, BaseFirebaseModel<Products> {
   Products({
     this.productName,
     this.productExplanation,
-    this.imagePath,
+    this.productContent,
+    this.imagePaths,
     this.categories,
     this.price,
     this.rating,
@@ -15,7 +16,8 @@ class Products extends Equatable with IdModel, BaseFirebaseModel<Products> {
   });
   final String? productName;
   final String? productExplanation;
-  final String? imagePath;
+  final String? productContent;
+  final List<String>? imagePaths;
   final String? categories;
   final double? price;
   final double? rating;
@@ -28,7 +30,8 @@ class Products extends Equatable with IdModel, BaseFirebaseModel<Products> {
   List<Object?> get props => [
         productName,
         productExplanation,
-        imagePath,
+        productContent,
+        imagePaths,
         categories,
         price,
         rating,
@@ -40,7 +43,8 @@ class Products extends Equatable with IdModel, BaseFirebaseModel<Products> {
   Products copyWith({
     String? productName,
     String? productExplanation,
-    String? imagePath,
+    String? productContent,
+    List<String>? imagePaths,
     String? categories,
     double? price,
     double? rating,
@@ -51,7 +55,8 @@ class Products extends Equatable with IdModel, BaseFirebaseModel<Products> {
     return Products(
       productName: productName ?? this.productName,
       productExplanation: productExplanation ?? this.productExplanation,
-      imagePath: imagePath ?? this.imagePath,
+      productContent: productContent ?? this.productContent,
+      imagePaths: imagePaths ?? this.imagePaths,
       categories: categories ?? this.categories,
       price: price ?? this.price,
       rating: rating ?? this.rating,
@@ -65,7 +70,8 @@ class Products extends Equatable with IdModel, BaseFirebaseModel<Products> {
     return {
       'product_name': productName,
       'product_explanation': productExplanation,
-      'imagePath': imagePath,
+      'productContent': productContent,
+      'imagePaths': imagePaths,
       'categories': categories,
       'price': price,
       'rating': rating,
@@ -79,7 +85,14 @@ class Products extends Equatable with IdModel, BaseFirebaseModel<Products> {
     return Products(
       productName: json['product_name'] as String?,
       productExplanation: json['product_explanation'] as String?,
-      imagePath: json['imagePath'] as String?,
+      productContent: json['productContent'] as String?,
+
+      imagePaths: json['imagePaths'] != null
+          ? (json['imagePaths'] as List<dynamic>)
+              .map((e) => e as String)
+              .toList()
+          : null,
+
       categories: json['categories'] as String?,
       price: json['price'] == null
           ? null

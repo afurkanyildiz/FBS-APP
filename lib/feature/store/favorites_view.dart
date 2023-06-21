@@ -1,14 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firat_bilgisayar_sistemleri/feature/store/product/product_detail.dart';
 
 import 'package:firat_bilgisayar_sistemleri/product/models/products_model.dart';
 import 'package:firat_bilgisayar_sistemleri/product/utility/exception/custom_exception.dart';
 
 import 'package:firat_bilgisayar_sistemleri/product/widget/text/title_text.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:kartal/kartal.dart';
-import 'package:provider/provider.dart';
 
 import '../../product/constants/colors.dart';
 import '../../product/service/cart.dart';
@@ -24,7 +23,9 @@ class _FavoritesWiewState extends State<FavoritesWiew> {
   Cart? cart;
   @override
   Widget build(BuildContext context) {
-    cart = Provider.of<Cart>(context, listen: false);
+    // cart = Provider.of<Cart>(context, listen: false);
+    final Cart cart = Cart();
+
     CollectionReference products =
         FirebaseFirestore.instance.collection('products');
 
@@ -38,6 +39,25 @@ class _FavoritesWiewState extends State<FavoritesWiew> {
       if (value == false) throw FirebaseCustomException('$value not null');
       return value.toJson();
     }).get();
+
+    void addToCartButtonPressed(Products products) {
+      final cartItem = CartItem(product: products, quantity: 1);
+      cart.addToCart(cartItem);
+
+      List<Map<String, dynamic>> cartItems = [];
+
+      setState(() {
+        cartItems = cart.items.map((cartItem) {
+          final product = cartItem.product;
+
+          return {
+            'productName': product.productName,
+            'price': product.price,
+            'quantity': cartItem.quantity,
+          };
+        }).toList();
+      });
+    }
 
     final size = MediaQuery.of(context).size;
     final maxWidth = size.width;
@@ -92,68 +112,81 @@ class _FavoritesWiewState extends State<FavoritesWiew> {
                     itemBuilder: (BuildContext context, int index) {
                       return Padding(
                         padding: context.onlyTopPaddingLow,
-                        child: Card(
-                          shape: BeveledRectangleBorder(
-                              borderRadius: BorderRadius.circular(15)),
-                          elevation: 5,
-                          child: Padding(
-                            padding: context.onlyLeftPaddingLow,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                favoritesProductImage(
-                                    maxHeight: maxHeight,
-                                    maxWidth: maxWidth,
-                                    products: values[index]),
-                                SizedBox(
-                                  width: maxWidth * .03,
-                                ),
-                                productGeneralInformation(
-                                    maxWidth: maxWidth,
-                                    products: values[index],
-                                    maxHeight: maxHeight),
-                                SizedBox(
-                                  width: maxWidth < 400
-                                      ? maxWidth * 0.01
-                                      : maxWidth < 450
-                                          ? maxWidth * 0.03
-                                          : maxWidth * 0.08,
-                                ),
-                                Container(
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                        '${(values[index]?.price).toString()} ₺',
-                                        style: TextStyle(
-                                            fontSize: maxWidth * .035),
-                                      ),
-                                      Icon(
-                                        Icons.favorite_outline,
-                                        size: maxHeight * .03,
-                                      ),
-                                      ElevatedButton(
-                                          onPressed: () {
-                                            _sepeteEkle(values[index]?.id);
-                                          },
-                                          style: ButtonStyle(
-                                              fixedSize:
-                                                  MaterialStateProperty.all(
-                                                      Size.fromHeight(
-                                                          maxHeight * .04)),
-                                              backgroundColor:
-                                                  MaterialStateProperty.all(
-                                                      ColorConstants
-                                                          .mainbackgroundlinear1)),
-                                          child: Text(
-                                            'Sepete Ekle',
-                                            style: TextStyle(
-                                                fontSize: maxWidth * .028),
-                                          ))
-                                    ],
+                        child: InkWell(
+                          // ignore: inference_failure_on_instance_creation
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                // ignore: inference_failure_on_instance_creation
+                                MaterialPageRoute(
+                                    builder: (context) => ProductDetailView(
+                                          product: values[index],
+                                        )));
+                          },
+                          child: Card(
+                            shape: BeveledRectangleBorder(
+                                borderRadius: BorderRadius.circular(15)),
+                            elevation: 5,
+                            child: Padding(
+                              padding: context.onlyLeftPaddingLow,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  favoritesProductImage(
+                                      maxHeight: maxHeight,
+                                      maxWidth: maxWidth,
+                                      products: values[index]),
+                                  SizedBox(
+                                    width: maxWidth * .03,
                                   ),
-                                )
-                              ],
+                                  productGeneralInformation(
+                                      maxWidth: maxWidth,
+                                      products: values[index],
+                                      maxHeight: maxHeight),
+                                  SizedBox(
+                                    width: maxWidth < 400
+                                        ? maxWidth * 0.01
+                                        : maxWidth < 450
+                                            ? maxWidth * 0.03
+                                            : maxWidth * 0.08,
+                                  ),
+                                  Container(
+                                    child: Column(
+                                      children: [
+                                        Text(
+                                          '${(values[index]?.price).toString()} ₺',
+                                          style: TextStyle(
+                                              fontSize: maxWidth * .035),
+                                        ),
+                                        Icon(
+                                          Icons.favorite_outline,
+                                          size: maxHeight * .03,
+                                        ),
+                                        ElevatedButton(
+                                            onPressed: () {
+                                              addToCartButtonPressed(
+                                                  values[index]!);
+                                            },
+                                            style: ButtonStyle(
+                                                fixedSize:
+                                                    MaterialStateProperty.all(
+                                                        Size.fromHeight(
+                                                            maxHeight * .04)),
+                                                backgroundColor:
+                                                    MaterialStateProperty.all(
+                                                        ColorConstants
+                                                            .mainbackgroundlinear1)),
+                                            child: Text(
+                                              'Sepete Ekle',
+                                              style: TextStyle(
+                                                  fontSize: maxWidth * .028),
+                                            ))
+                                      ],
+                                    ),
+                                  )
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -166,35 +199,6 @@ class _FavoritesWiewState extends State<FavoritesWiew> {
         },
       ),
     );
-  }
-
-  void _sepeteEkle(String? productId) async {
-    var user = FirebaseAuth.instance.currentUser;
-
-    if (user != null && productId != null) {
-      await FirebaseFirestore.instance
-          .collection('products')
-          .doc(productId)
-          .get()
-          .then((snapshot) {
-        if (snapshot.exists) {
-          final productData = snapshot.data() as Map<String, dynamic>;
-          final product = Products(
-            stock: productData['stock'] == null
-                ? 0
-                : int.tryParse(productData['stock'].toString())!,
-          ).fromJson(productData); // Düzeltme burada
-          final cartItem = CartItem(product: product, quantity: 1);
-          Provider.of<Cart>(context, listen: false).addToCart(cartItem);
-          print(
-              'sepeteEkle:${Provider.of<Cart>(context, listen: false).items.length}');
-          print(user);
-        }
-        // ignore: inference_failure_on_untyped_parameter
-      }).catchError((error) {
-        print('Hata: $error');
-      });
-    }
   }
 }
 
@@ -266,10 +270,18 @@ class favoritesProductImage extends StatelessWidget {
     return Container(
       height: maxHeight * .1,
       width: maxWidth * .25,
-      child: Image.network(
-        products?.imagePath ?? '',
-        fit: BoxFit.contain,
-      ),
+      child: products?.imagePaths != null && products!.imagePaths!.isNotEmpty
+          ? Image.network(
+              products!.imagePaths![0], // İlk resmi gösteriyoruz
+              fit: BoxFit.contain,
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              },
+            )
+          : Container(),
     );
   }
 }

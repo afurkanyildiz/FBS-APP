@@ -1,12 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firat_bilgisayar_sistemleri/feature/store/product/product_detail.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:kartal/kartal.dart';
 import 'package:firat_bilgisayar_sistemleri/product/models/products_model.dart';
 import 'package:firat_bilgisayar_sistemleri/product/utility/exception/custom_exception.dart';
 import 'package:firat_bilgisayar_sistemleri/product/widget/text/title_text.dart';
-import 'package:provider/provider.dart';
 import 'package:firat_bilgisayar_sistemleri/product/constants/colors.dart';
 import 'package:firat_bilgisayar_sistemleri/product/constants/string.dart';
 import 'package:firat_bilgisayar_sistemleri/product/widget/text/small_title_text.dart';
@@ -14,7 +13,6 @@ import 'package:firat_bilgisayar_sistemleri/product/widget/text/subtitle_text.da
 import '../../product/constants/padding.dart';
 
 import '../../product/service/cart.dart';
-
 import '../../product/widget/card/store_view_small_card.dart';
 
 class StoreView extends StatefulWidget {
@@ -43,8 +41,28 @@ class _StoreViewState extends State<StoreView> {
       if (value == false) throw FirebaseCustomException('$value not null');
       return value.toJson();
     }).get();
-    // List<Product> expensiveProduct =
-    //     products.where((product) => product.price < 25.000).toList();
+
+    final Cart cart = Cart();
+
+    void addToCartButtonPressed(Products products) {
+      final cartItem = CartItem(product: products, quantity: 1);
+      cart.addToCart(cartItem);
+
+      List<Map<String, dynamic>> cartItems = [];
+
+      setState(() {
+        cartItems = cart.items.map((cartItem) {
+          final product = cartItem.product;
+
+          return {
+            'productName': product.productName,
+            'price': product.price,
+            'quantity': cartItem.quantity,
+          };
+        }).toList();
+      });
+    }
+
     final size = MediaQuery.of(context).size;
     final maxWidth = size.width;
     final maxHeight = size.height;
@@ -119,6 +137,7 @@ class _StoreViewState extends State<StoreView> {
                                 maxWidth: maxWidth,
                                 maxHeight: maxHeight,
                                 products: values[index],
+                                addToCartButtonPressed: addToCartButtonPressed,
                               );
                             },
                           ),
@@ -134,6 +153,7 @@ class _StoreViewState extends State<StoreView> {
                                 maxWidth: maxWidth,
                                 maxHeight: maxHeight,
                                 products: values[index],
+                                addToCartButtonPressed: addToCartButtonPressed,
                               );
                             },
                           ),
@@ -149,35 +169,6 @@ class _StoreViewState extends State<StoreView> {
         },
       ),
     );
-  }
-
-  void sepeteEkle(String? productId) async {
-    var user = FirebaseAuth.instance.currentUser;
-
-    if (user != null && productId != null) {
-      await FirebaseFirestore.instance
-          .collection('products')
-          .doc(productId)
-          .get()
-          .then((snapshot) {
-        if (snapshot.exists) {
-          final productData = snapshot.data() as Map<String, dynamic>;
-          final product = Products(
-            stock: productData['stock'] == null
-                ? 0
-                : int.tryParse(productData['stock'].toString())!,
-          ).fromJson(productData); // Düzeltme burada
-          final cartItem = CartItem(product: product, quantity: 1);
-          Provider.of<Cart>(context, listen: false).addToCart(cartItem);
-          print(
-              'sepeteEkle:${Provider.of<Cart>(context, listen: false).items.length}');
-          print(user);
-        }
-        // ignore: inference_failure_on_untyped_parameter
-      }).catchError((error) {
-        print('Hata: $error');
-      });
-    }
   }
 }
 
@@ -284,117 +275,128 @@ class _SpecialForYouTitleWiew extends StatelessWidget {
   }
 }
 
-class _SpecialForYouWiew extends StatefulWidget {
+class _SpecialForYouWiew extends StatelessWidget {
   final double maxWidth;
   final double maxHeight;
   final Products? products;
+  final Function addToCartButtonPressed;
 
   const _SpecialForYouWiew({
     Key? key,
     required this.maxWidth,
     required this.maxHeight,
     required this.products,
+    required this.addToCartButtonPressed,
   }) : super(key: key);
-
-  @override
-  State<_SpecialForYouWiew> createState() => _SpecialForYouWiewState();
-}
-
-class _SpecialForYouWiewState extends State<_SpecialForYouWiew> {
-  void onPressed() {
-    final parentState = context.findAncestorStateOfType<_StoreViewState>();
-    parentState?.sepeteEkle(widget.products?.id);
-  }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: context.horizontalPaddingLow,
-      child: Card(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.0),
-          side: BorderSide(color: Colors.grey, width: 1),
-        ),
-        child: Column(
-          children: [
-            Expanded(
-              child: AspectRatio(
-                aspectRatio: widget.maxWidth < 380 ? 12 / 10 : 12 / 8,
-                child: Padding(
-                  padding: context.paddingLow,
-                  child: Image.network(
-                    widget.products?.imagePath ?? '',
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ),
-            ),
-            Expanded(
-              flex: 2,
-              child: Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Container(
-                  width: widget.maxHeight * 0.25,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.products?.productName ?? '',
-                        style: TextStyle(
-                            fontSize: widget.maxHeight * 0.03,
-                            fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(
-                        height: widget.maxHeight * 0.02,
-                      ),
-                      Text(
-                        widget.products?.productExplanation ?? '',
-                        overflow: TextOverflow.clip,
-                        maxLines: widget.maxWidth < 380 ? 2 : 3,
-                        softWrap: widget.maxWidth < 380 ? false : true,
-                        style: TextStyle(
-                            fontSize: widget.maxHeight * 0.02,
-                            fontWeight: FontWeight.normal),
-                      ),
-                      SizedBox(
-                        height: widget.maxHeight * 0.01,
-                      ),
-                      Row(
-                        children: [
-                          OutlinedButton(
-                            onPressed: () {
-                              onPressed();
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+              context,
+              // ignore: inference_failure_on_instance_creation
+              MaterialPageRoute(
+                  builder: (context) => ProductDetailView(
+                        product: products,
+                      )));
+        },
+        child: Card(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.0),
+            side: BorderSide(color: Colors.grey, width: 1),
+          ),
+          child: Column(
+            children: [
+              Expanded(
+                child: AspectRatio(
+                  aspectRatio: maxWidth < 380 ? 12 / 10 : 12 / 8,
+                  child: Padding(
+                    padding: context.paddingLow,
+                    child: products?.imagePaths != null &&
+                            products!.imagePaths!.isNotEmpty
+                        ? Image.network(
+                            products!.imagePaths![0], // İlk resmi gösteriyoruz
+                            fit: BoxFit.contain,
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return Center(
+                                child: CircularProgressIndicator(),
+                              );
                             },
-                            child: Text('Sepete Ekle',
-                                style: TextStyle(
-                                    fontSize: widget.maxHeight * 0.02),
-                                textAlign: TextAlign.center),
-                            style: ButtonStyle(
-                              foregroundColor: MaterialStateProperty.all(
-                                  ColorConstants.textfieldWhite),
-                              backgroundColor: MaterialStateProperty.all(
-                                  ColorConstants.mainbackgroundlinear1),
-                              overlayColor: MaterialStateProperty.all(
-                                  ColorConstants.chipColor),
-                            ),
-                          ),
-                          SizedBox(
-                              width:
-                                  MediaQuery.of(context).size.height * 0.015),
-                          Text(
-                            '${(widget.products?.price)?.toStringAsFixed(3)} ₺',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: widget.maxHeight * 0.015),
                           )
-                        ],
-                      )
-                    ],
+                        : Container(),
                   ),
                 ),
               ),
-            )
-          ],
+              Expanded(
+                flex: 2,
+                child: Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Container(
+                    width: maxHeight * 0.25,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          products?.productName ?? '',
+                          style: TextStyle(
+                              fontSize: maxHeight * 0.03,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(
+                          height: maxHeight * 0.02,
+                        ),
+                        Text(
+                          products?.productExplanation ?? '',
+                          overflow: TextOverflow.clip,
+                          maxLines: maxWidth < 380 ? 2 : 3,
+                          softWrap: maxWidth < 380 ? false : true,
+                          style: TextStyle(
+                              fontSize: maxHeight * 0.02,
+                              fontWeight: FontWeight.normal),
+                        ),
+                        SizedBox(
+                          height: maxHeight * 0.01,
+                        ),
+                        Row(
+                          children: [
+                            OutlinedButton(
+                              onPressed: () {
+                                addToCartButtonPressed(products);
+                              },
+                              child: Text('Sepete Ekle',
+                                  style: TextStyle(fontSize: maxHeight * 0.02),
+                                  textAlign: TextAlign.center),
+                              style: ButtonStyle(
+                                foregroundColor: MaterialStateProperty.all(
+                                    ColorConstants.textfieldWhite),
+                                backgroundColor: MaterialStateProperty.all(
+                                    ColorConstants.mainbackgroundlinear1),
+                                overlayColor: MaterialStateProperty.all(
+                                    ColorConstants.chipColor),
+                              ),
+                            ),
+                            SizedBox(
+                                width:
+                                    MediaQuery.of(context).size.height * 0.015),
+                            Text(
+                              '${(products?.price)?.toStringAsFixed(3)} ₺',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: maxHeight * 0.015),
+                            )
+                          ],
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -430,120 +432,125 @@ class _PopularProductsTitleView extends StatelessWidget {
   }
 }
 
-class _PopularProductsListView extends StatefulWidget {
+class _PopularProductsListView extends StatelessWidget {
   final double maxWidth;
   final double maxHeight;
   final Products? products;
+  final Function addToCartButtonPressed;
 
   const _PopularProductsListView({
     Key? key,
     required this.maxWidth,
     required this.maxHeight,
     required this.products,
+    required this.addToCartButtonPressed,
   }) : super(key: key);
-
-  @override
-  State<_PopularProductsListView> createState() =>
-      _PopularProductsListViewState();
-}
-
-class _PopularProductsListViewState extends State<_PopularProductsListView> {
-  void onPressed() {
-    final parentState = context.findAncestorStateOfType<_StoreViewState>();
-    parentState?.sepeteEkle(widget.products?.id);
-  }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: context.horizontalPaddingLow,
-      child: Card(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.0),
-          side: BorderSide(color: Colors.grey, width: 1),
-        ),
-        child: Column(
-          children: [
-            Expanded(
-              child: AspectRatio(
-                aspectRatio: widget.maxWidth < 380 ? 12 / 10 : 12 / 8,
-                child: Padding(
-                  padding: context.paddingLow,
-                  child: Image.network(
-                    widget.products?.imagePath ?? '',
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ),
-            ),
-            Expanded(
-              flex: 2,
-              child: Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Container(
-                  width: widget.maxHeight * 0.25,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.products?.productName ?? '',
-                        style: TextStyle(
-                            fontSize: widget.maxHeight * 0.03,
-                            fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(
-                        height: widget.maxHeight * 0.02,
-                      ),
-                      Text(
-                        widget.products?.productExplanation ?? '',
-                        overflow: TextOverflow.clip,
-                        maxLines: widget.maxWidth < 380 ? 1 : 2,
-                        softWrap: widget.maxWidth < 380 ? false : true,
-                        style: TextStyle(
-                            fontSize: widget.maxHeight * 0.02,
-                            fontWeight: FontWeight.normal),
-                      ),
-                      SizedBox(
-                        height: widget.maxHeight * 0.01,
-                      ),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          OutlinedButton(
-                            onPressed: () {
-                              onPressed();
-                            },
-                            child: Text('Sepete Ekle',
-                                style: TextStyle(
-                                    fontSize: widget.maxHeight * 0.02),
-                                textAlign: TextAlign.center),
-                            style: ButtonStyle(
-                              foregroundColor: MaterialStateProperty.all(
-                                  ColorConstants.textfieldWhite),
-                              backgroundColor: MaterialStateProperty.all(
-                                  ColorConstants.mainbackgroundlinear1),
-                              overlayColor: MaterialStateProperty.all(
-                                  ColorConstants.chipColor),
-                            ),
-                          ),
-                          SizedBox(
-                              width: MediaQuery.of(context).size.height * 0.01),
-                          Expanded(
-                            child: Text(
-                              '${(widget.products?.price)?.toStringAsFixed(3)} ₺',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: widget.maxHeight * 0.015),
-                            ),
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+              context,
+              // ignore: inference_failure_on_instance_creation
+              MaterialPageRoute(
+                  builder: (context) => ProductDetailView(
+                        product: products,
+                      )));
+        },
+        child: Card(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.0),
+            side: BorderSide(color: Colors.grey, width: 1),
+          ),
+          child: Column(
+            children: [
+              Expanded(
+                child: AspectRatio(
+                  aspectRatio: maxWidth < 380 ? 12 / 10 : 12 / 8,
+                  child: Padding(
+                    padding: context.paddingLow,
+                    child: products?.imagePaths != null &&
+                            products!.imagePaths!.isNotEmpty
+                        ? Image.network(
+                            products!.imagePaths![0], // İlk resmi gösteriyoruz
+                            fit: BoxFit.contain,
                           )
-                        ],
-                      )
-                    ],
+                        : Container(),
                   ),
                 ),
               ),
-            )
-          ],
+              Expanded(
+                flex: 2,
+                child: Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Container(
+                    width: maxHeight * 0.25,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          products?.productName ?? '',
+                          style: TextStyle(
+                              fontSize: maxHeight * 0.03,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(
+                          height: maxHeight * 0.02,
+                        ),
+                        Text(
+                          products?.productExplanation ?? '',
+                          overflow: TextOverflow.clip,
+                          maxLines: maxWidth < 380 ? 1 : 2,
+                          softWrap: maxWidth < 380 ? false : true,
+                          style: TextStyle(
+                              fontSize: maxHeight * 0.02,
+                              fontWeight: FontWeight.normal),
+                        ),
+                        SizedBox(
+                          height: maxHeight * 0.01,
+                        ),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            OutlinedButton(
+                              onPressed: () {
+                                addToCartButtonPressed(products);
+                              },
+                              child: Text('Sepete Ekle',
+                                  style: TextStyle(fontSize: maxHeight * 0.02),
+                                  textAlign: TextAlign.center),
+                              style: ButtonStyle(
+                                foregroundColor: MaterialStateProperty.all(
+                                    ColorConstants.textfieldWhite),
+                                backgroundColor: MaterialStateProperty.all(
+                                    ColorConstants.mainbackgroundlinear1),
+                                overlayColor: MaterialStateProperty.all(
+                                    ColorConstants.chipColor),
+                              ),
+                            ),
+                            SizedBox(
+                                width:
+                                    MediaQuery.of(context).size.height * 0.01),
+                            Expanded(
+                              child: Text(
+                                '${(products?.price)?.toStringAsFixed(3)} ₺',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: maxHeight * 0.015),
+                              ),
+                            )
+                          ],
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );

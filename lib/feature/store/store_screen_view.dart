@@ -29,11 +29,16 @@ class _StoreScreenViewState extends State<StoreScreenView> {
   }
 }
 
-class StoreScaffoldView extends StatelessWidget {
+class StoreScaffoldView extends StatefulWidget {
   StoreScaffoldView({
     super.key,
   });
 
+  @override
+  State<StoreScaffoldView> createState() => _StoreScaffoldViewState();
+}
+
+class _StoreScaffoldViewState extends State<StoreScaffoldView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
