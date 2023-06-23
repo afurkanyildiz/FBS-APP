@@ -1,12 +1,13 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:dots_indicator/dots_indicator.dart';
 import 'package:firat_bilgisayar_sistemleri/product/constants/colors.dart';
+import 'package:firat_bilgisayar_sistemleri/product/service/firebase_favorites_services.dart';
 import 'package:flutter/material.dart';
 import 'package:kartal/kartal.dart';
 import 'package:provider/provider.dart';
 
 import '../../../product/models/products_model.dart';
-import '../../../product/service/cart.dart';
+import '../../../product/models/cart.dart';
 import '../../../product/widget/text/title_text.dart';
 
 class ProductDetailView extends StatefulWidget {
@@ -127,11 +128,16 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                               }),
                         ),
                 ),
-                productFavShareButton(maxWidth: maxWidth, maxHeight: maxHeight)
+                productFavShareButton(
+                  maxWidth: maxWidth,
+                  maxHeight: maxHeight,
+                  widget: widget,
+                )
               ]),
               imageDotsIndicator(widget: widget, currentPage: _currentPage),
               productName(
                   maxWidth: maxWidth, maxHeight: maxHeight, widget: widget),
+              productDetail(widget: widget, maxHeight: maxHeight),
             ],
           ),
         ),
@@ -189,15 +195,84 @@ class _ProductDetailViewState extends State<ProductDetailView> {
   }
 }
 
+class productDetail extends StatelessWidget {
+  const productDetail({
+    super.key,
+    required this.maxHeight,
+    required this.widget,
+  });
+
+  final ProductDetailView widget;
+  final double maxHeight;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: context.horizontalPaddingLow,
+      child: widget.product?.technicalDetails != null &&
+              widget.product!.technicalDetails!.isNotEmpty
+          ? Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: ColorConstants.colorsBlack,
+                  width: 1.0,
+                ),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: DataTable(
+                headingRowHeight: 0,
+                columns: [
+                  DataColumn(
+                    label: Text(''),
+                  ),
+                  DataColumn(
+                    label: Text(''),
+                  ),
+                ],
+                rows: widget.product!.technicalDetails!.entries
+                    .map(
+                      (entry) => DataRow(
+                        cells: [
+                          DataCell(
+                            Text(
+                              entry.key,
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: ColorConstants.colorsBlack,
+                                  fontSize: maxHeight * 0.015),
+                            ),
+                          ),
+                          DataCell(
+                            Text(
+                              '${entry.value}',
+                              style: TextStyle(
+                                  // fontWeight: FontWeight.bold,
+                                  color: ColorConstants.colorsBlack,
+                                  fontSize: maxHeight * 0.015),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                    .toList(),
+              ),
+            )
+          : SizedBox(), // Eğer technicalDetails boş ise hiçbir şey çizme
+    );
+  }
+}
+
 class productFavShareButton extends StatelessWidget {
   const productFavShareButton({
     super.key,
     required this.maxWidth,
     required this.maxHeight,
+    required this.widget,
   });
 
   final double maxWidth;
   final double maxHeight;
+  final ProductDetailView widget;
 
   @override
   Widget build(BuildContext context) {
@@ -224,7 +299,9 @@ class productFavShareButton extends StatelessWidget {
               height: maxHeight * 0.008,
             ),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                addToFavorites(widget.product!.id!);
+              },
               style: ButtonStyle(
                 minimumSize: MaterialStatePropertyAll(
                     Size(maxWidth * 0.08, maxHeight * 0.05)),

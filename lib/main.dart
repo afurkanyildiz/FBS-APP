@@ -1,7 +1,7 @@
 import 'package:firat_bilgisayar_sistemleri/feature/home/home.dart';
 import 'package:firat_bilgisayar_sistemleri/product/constants/string.dart';
 import 'package:firat_bilgisayar_sistemleri/product/initialize/application_start.dart';
-import 'package:firat_bilgisayar_sistemleri/product/service/cart.dart';
+import 'package:firat_bilgisayar_sistemleri/product/models/cart.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

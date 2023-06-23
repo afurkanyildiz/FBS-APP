@@ -5,7 +5,7 @@ import 'package:firat_bilgisayar_sistemleri/product/constants/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../product/service/cart.dart';
+import '../../product/models/cart.dart';
 import 'favorites_view.dart';
 
 class StoreScreenView extends StatefulWidget {

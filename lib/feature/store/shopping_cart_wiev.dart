@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../product/constants/colors.dart';
 import '../../product/models/products_model.dart';
-import '../../product/service/cart.dart';
+import '../../product/models/cart.dart';
 import '../../product/widget/text/title_text.dart';
 
 class ShoppingCartScreen extends StatefulWidget {
@@ -16,26 +16,6 @@ class ShoppingCartScreen extends StatefulWidget {
 
 class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
   List<Map<String, dynamic>> cartItems = [];
-
-  // @override
-  // void didChangeDependencies() {
-  //   // TODO: implement didChangeDependencies
-  //   final cart = Provider.of<Cart>(context);
-  //   cart.addListener(() {
-  //     setState(() {
-  //       // Update the UI to reflect the changes to the cart.
-  //       cartItems = cart.items.map((cartItem) {
-  //         final product = cartItem.product;
-
-  //         return {
-  //           'productName': product.productName,
-  //           'price': product.price,
-  //           'quantity': cartItem.quantity,
-  //         };
-  //       }).toList();
-  //     });
-  //   });
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -134,7 +114,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                                 ),
                               ),
                               Text(
-                                (product.price ?? 0).toString(),
+                                '${(product.price ?? 0).toString()} ₺',
                                 style: TextStyle(fontSize: maxHeight * 0.022),
                               ),
                               Row(

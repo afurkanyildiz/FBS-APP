@@ -7,6 +7,7 @@ class Products extends Equatable with IdModel, BaseFirebaseModel<Products> {
     this.productExplanation,
     this.productContent,
     this.imagePaths,
+    this.technicalDetails,
     this.categories,
     this.price,
     this.rating,
@@ -18,6 +19,7 @@ class Products extends Equatable with IdModel, BaseFirebaseModel<Products> {
   final String? productExplanation;
   final String? productContent;
   final List<String>? imagePaths;
+  final Map<String, dynamic>? technicalDetails;
   final String? categories;
   final double? price;
   final double? rating;
@@ -32,6 +34,7 @@ class Products extends Equatable with IdModel, BaseFirebaseModel<Products> {
         productExplanation,
         productContent,
         imagePaths,
+        technicalDetails,
         categories,
         price,
         rating,
@@ -45,6 +48,7 @@ class Products extends Equatable with IdModel, BaseFirebaseModel<Products> {
     String? productExplanation,
     String? productContent,
     List<String>? imagePaths,
+    Map<String, dynamic>? technicalDetails,
     String? categories,
     double? price,
     double? rating,
@@ -57,6 +61,7 @@ class Products extends Equatable with IdModel, BaseFirebaseModel<Products> {
       productExplanation: productExplanation ?? this.productExplanation,
       productContent: productContent ?? this.productContent,
       imagePaths: imagePaths ?? this.imagePaths,
+      technicalDetails: technicalDetails ?? this.technicalDetails,
       categories: categories ?? this.categories,
       price: price ?? this.price,
       rating: rating ?? this.rating,
@@ -72,6 +77,7 @@ class Products extends Equatable with IdModel, BaseFirebaseModel<Products> {
       'product_explanation': productExplanation,
       'productContent': productContent,
       'imagePaths': imagePaths,
+      'technicalDetails': technicalDetails,
       'categories': categories,
       'price': price,
       'rating': rating,
@@ -92,7 +98,10 @@ class Products extends Equatable with IdModel, BaseFirebaseModel<Products> {
               .map((e) => e as String)
               .toList()
           : null,
-
+      technicalDetails: json['technicalDetails'] == null
+          ? null
+          : Map<String, String>.from(
+              json['technicalDetails'] as Map<String, dynamic>),
       categories: json['categories'] as String?,
       price: json['price'] == null
           ? null

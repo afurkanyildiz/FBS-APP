@@ -12,7 +12,7 @@ import 'package:firat_bilgisayar_sistemleri/product/widget/text/small_title_text
 import 'package:firat_bilgisayar_sistemleri/product/widget/text/subtitle_text.dart';
 import '../../product/constants/padding.dart';
 
-import '../../product/service/cart.dart';
+import '../../product/models/cart.dart';
 import '../../product/widget/card/store_view_small_card.dart';
 
 class StoreView extends StatefulWidget {

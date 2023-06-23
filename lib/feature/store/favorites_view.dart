@@ -10,7 +10,7 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:kartal/kartal.dart';
 
 import '../../product/constants/colors.dart';
-import '../../product/service/cart.dart';
+import '../../product/models/cart.dart';
 
 class FavoritesWiew extends StatefulWidget {
   const FavoritesWiew({Key? key}) : super(key: key);
