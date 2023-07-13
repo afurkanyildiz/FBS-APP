@@ -1,7 +1,7 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:dots_indicator/dots_indicator.dart';
 import 'package:firat_bilgisayar_sistemleri/product/constants/colors.dart';
-import 'package:firat_bilgisayar_sistemleri/product/service/firebase_favorites_services.dart';
+import 'package:firat_bilgisayar_sistemleri/product/models/favorites.dart';
 import 'package:flutter/material.dart';
 import 'package:kartal/kartal.dart';
 import 'package:provider/provider.dart';
@@ -11,8 +11,11 @@ import '../../../product/models/cart.dart';
 import '../../../product/widget/text/title_text.dart';
 
 class ProductDetailView extends StatefulWidget {
-  final Products? product;
-  const ProductDetailView({Key? key, required this.product}) : super(key: key);
+  final Products product;
+  final Favorites favorites;
+  const ProductDetailView(
+      {Key? key, required this.product, required this.favorites})
+      : super(key: key);
 
   @override
   State<ProductDetailView> createState() => _ProductDetailViewState();
@@ -24,10 +27,13 @@ class _ProductDetailViewState extends State<ProductDetailView> {
   @override
   Widget build(BuildContext context) {
     final Cart cart = Cart();
+    bool isRefreshing = false;
+
     void addToCartButtonPressed(Products products) {
       final cartItem = CartItem(product: products, quantity: 1);
       cart.addToCart(cartItem);
 
+      // ignore: omit_local_variable_types, unused_local_variable
       List<Map<String, dynamic>> cartItems = [];
 
       setState(() {
@@ -84,10 +90,10 @@ class _ProductDetailViewState extends State<ProductDetailView> {
               Stack(children: [
                 Padding(
                   padding: context.horizontalPaddingLow,
-                  child: widget.product?.imagePaths?.length == 1
+                  child: widget.product.imagePaths?.length == 1
                       ? Center(
                           child: Image.network(
-                            widget.product!.imagePaths!.first,
+                            widget.product.imagePaths!.first,
                             fit: BoxFit.contain,
                             loadingBuilder: (context, child, loadingProgress) {
                               if (loadingProgress == null) return child;
@@ -97,9 +103,9 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                           ),
                         )
                       : CarouselSlider(
-                          items: widget.product?.imagePaths != null &&
-                                  widget.product!.imagePaths!.isNotEmpty
-                              ? widget.product!.imagePaths!
+                          items: widget.product.imagePaths != null &&
+                                  widget.product.imagePaths!.isNotEmpty
+                              ? widget.product.imagePaths!
                                   .map((imagePath) => Image.network(
                                         imagePath,
                                         fit: BoxFit.contain,
@@ -128,11 +134,13 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                               }),
                         ),
                 ),
-                productFavShareButton(
-                  maxWidth: maxWidth,
-                  maxHeight: maxHeight,
-                  widget: widget,
-                )
+                ProductFavShareButton(
+                    maxWidth: maxWidth,
+                    maxHeight: maxHeight,
+                    widget: widget,
+                    favorites: widget.favorites
+                    // addToFavoritesButtonPressed: addToFavoritesButtonPressed,
+                    )
               ]),
               imageDotsIndicator(widget: widget, currentPage: _currentPage),
               productName(
@@ -155,7 +163,7 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                     padding: context.onlyLeftPaddingLow,
                     child: ElevatedButton(
                       onPressed: () {
-                        addToCartButtonPressed(widget.product!);
+                        addToCartButtonPressed(widget.product);
                       },
                       style: ButtonStyle(
                         shape: MaterialStatePropertyAll(
@@ -179,7 +187,7 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                   trailing: Padding(
                     padding: context.onlyRightPaddingMedium,
                     child: Text(
-                      '${widget.product?.price.toString()} ₺',
+                      '${widget.product.price.toString()} ₺',
                       style: TextStyle(
                           fontSize: maxHeight * .03,
                           color: ColorConstants.colorsBlack),
@@ -209,8 +217,8 @@ class productDetail extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: context.horizontalPaddingLow,
-      child: widget.product?.technicalDetails != null &&
-              widget.product!.technicalDetails!.isNotEmpty
+      child: widget.product.technicalDetails != null &&
+              widget.product.technicalDetails!.isNotEmpty
           ? Container(
               decoration: BoxDecoration(
                 border: Border.all(
@@ -229,7 +237,7 @@ class productDetail extends StatelessWidget {
                     label: Text(''),
                   ),
                 ],
-                rows: widget.product!.technicalDetails!.entries
+                rows: widget.product.technicalDetails!.entries
                     .map(
                       (entry) => DataRow(
                         cells: [
@@ -262,64 +270,83 @@ class productDetail extends StatelessWidget {
   }
 }
 
-class productFavShareButton extends StatelessWidget {
-  const productFavShareButton({
-    super.key,
+class ProductFavShareButton extends StatefulWidget {
+  const ProductFavShareButton({
+    Key? key,
     required this.maxWidth,
     required this.maxHeight,
     required this.widget,
-  });
+    required this.favorites,
+  }) : super(key: key);
 
   final double maxWidth;
   final double maxHeight;
   final ProductDetailView widget;
+  final Favorites favorites;
 
   @override
+  State<ProductFavShareButton> createState() => _ProductFavShareButtonState();
+}
+
+class _ProductFavShareButtonState extends State<ProductFavShareButton> {
+  @override
   Widget build(BuildContext context) {
+    final favorites = Favorites();
+    final isFavorite = widget.favorites.isFavorite(widget.widget.product);
     return Positioned(
-        top: maxWidth * 0.05,
-        right: maxWidth * 0.02,
-        child: Column(
-          children: [
-            ElevatedButton(
-              onPressed: () {},
-              style: ButtonStyle(
-                  minimumSize: MaterialStatePropertyAll(
-                      Size(maxWidth * 0.08, maxHeight * 0.05)),
-                  backgroundColor:
-                      const MaterialStatePropertyAll(ColorConstants.chipColor),
-                  shape: MaterialStatePropertyAll(RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20)))),
-              child: Icon(
-                Icons.share,
-                size: maxHeight * 0.03,
+      top: widget.maxWidth * 0.05,
+      right: widget.maxWidth * 0.02,
+      child: Column(
+        children: [
+          ElevatedButton(
+            onPressed: () {},
+            style: ButtonStyle(
+              minimumSize: MaterialStateProperty.all(
+                Size(widget.maxWidth * 0.08, widget.maxHeight * 0.05),
               ),
-            ),
-            SizedBox(
-              height: maxHeight * 0.008,
-            ),
-            ElevatedButton(
-              onPressed: () {
-                addToFavorites(widget.product!.id!);
-              },
-              style: ButtonStyle(
-                minimumSize: MaterialStatePropertyAll(
-                    Size(maxWidth * 0.08, maxHeight * 0.05)),
-                backgroundColor:
-                    const MaterialStatePropertyAll(ColorConstants.chipColor),
-                shape: MaterialStatePropertyAll(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
+              backgroundColor: MaterialStateProperty.all(
+                ColorConstants.chipColor,
+              ),
+              shape: MaterialStateProperty.all(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
                 ),
               ),
-              child: Icon(
-                Icons.favorite_border,
-                size: maxHeight * 0.03,
+            ),
+            child: Icon(
+              Icons.share,
+              size: widget.maxHeight * 0.03,
+            ),
+          ),
+          SizedBox(
+            height: widget.maxHeight * 0.008,
+          ),
+          ElevatedButton(
+            onPressed: () {
+              favorites.toogleFavorite(widget.widget.product);
+            },
+            style: ButtonStyle(
+              minimumSize: MaterialStateProperty.all(
+                Size(widget.maxWidth * 0.08, widget.maxHeight * 0.05),
               ),
-            )
-          ],
-        ));
+              backgroundColor: MaterialStateProperty.all(
+                ColorConstants.chipColor,
+              ),
+              shape: MaterialStateProperty.all(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+            ),
+            child: Icon(
+              isFavorite ? Icons.favorite : Icons.favorite_border,
+              color: isFavorite ? ColorConstants.textfieldWhite : null,
+              size: widget.maxHeight * 0.03,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -336,7 +363,7 @@ class imageDotsIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DotsIndicator(
-      dotsCount: widget.product?.imagePaths?.length ?? 0,
+      dotsCount: widget.product.imagePaths?.length ?? 0,
       position: _currentPage.toInt(),
       decorator: DotsDecorator(
           activeColor: ColorConstants.mainbackgroundlinear1,
@@ -374,7 +401,7 @@ class productName extends StatelessWidget {
           child: Center(
             child: RichText(
               text: TextSpan(
-                  text: widget.product?.productName ?? '',
+                  text: widget.product.productName ?? '',
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.black,
@@ -382,7 +409,7 @@ class productName extends StatelessWidget {
                   children: <TextSpan>[
                     TextSpan(text: '  '),
                     TextSpan(
-                      text: widget.product?.productExplanation ?? '',
+                      text: widget.product.productExplanation ?? '',
                       style: TextStyle(
                           color: Colors.black54, fontSize: maxHeight * 0.015),
                     )

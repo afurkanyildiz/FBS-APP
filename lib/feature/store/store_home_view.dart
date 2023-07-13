@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firat_bilgisayar_sistemleri/feature/store/product/product_detail.dart';
+import 'package:firat_bilgisayar_sistemleri/product/models/favorites.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:kartal/kartal.dart';
@@ -10,6 +11,7 @@ import 'package:firat_bilgisayar_sistemleri/product/constants/colors.dart';
 import 'package:firat_bilgisayar_sistemleri/product/constants/string.dart';
 import 'package:firat_bilgisayar_sistemleri/product/widget/text/small_title_text.dart';
 import 'package:firat_bilgisayar_sistemleri/product/widget/text/subtitle_text.dart';
+import 'package:provider/provider.dart';
 import '../../product/constants/padding.dart';
 
 import '../../product/models/cart.dart';
@@ -43,11 +45,14 @@ class _StoreViewState extends State<StoreView> {
     }).get();
 
     final Cart cart = Cart();
+    // ignore: omit_local_variable_types, unused_local_variable
+    final Favorites favorites = Favorites();
 
     void addToCartButtonPressed(Products products) {
       final cartItem = CartItem(product: products, quantity: 1);
       cart.addToCart(cartItem);
 
+      // ignore: unused_local_variable
       List<Map<String, dynamic>> cartItems = [];
 
       setState(() {
@@ -98,7 +103,7 @@ class _StoreViewState extends State<StoreView> {
       body: FutureBuilder(
         future: response,
         builder: (BuildContext context,
-            AsyncSnapshot<QuerySnapshot<Products?>> snapshot) {
+            AsyncSnapshot<QuerySnapshot<Products>> snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.none:
               return Placeholder();
@@ -278,7 +283,7 @@ class _SpecialForYouTitleWiew extends StatelessWidget {
 class _SpecialForYouWiew extends StatelessWidget {
   final double maxWidth;
   final double maxHeight;
-  final Products? products;
+  final Products products;
   final Function addToCartButtonPressed;
 
   const _SpecialForYouWiew({
@@ -291,6 +296,7 @@ class _SpecialForYouWiew extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final favorites = Provider.of<Favorites>(context);
     return Padding(
       padding: context.horizontalPaddingLow,
       child: InkWell(
@@ -301,6 +307,7 @@ class _SpecialForYouWiew extends StatelessWidget {
               MaterialPageRoute(
                   builder: (context) => ProductDetailView(
                         product: products,
+                        favorites: favorites,
                       )));
         },
         child: Card(
@@ -315,10 +322,10 @@ class _SpecialForYouWiew extends StatelessWidget {
                   aspectRatio: maxWidth < 380 ? 12 / 10 : 12 / 8,
                   child: Padding(
                     padding: context.paddingLow,
-                    child: products?.imagePaths != null &&
-                            products!.imagePaths!.isNotEmpty
+                    child: products.imagePaths != null &&
+                            products.imagePaths!.isNotEmpty
                         ? Image.network(
-                            products!.imagePaths![0], // İlk resmi gösteriyoruz
+                            products.imagePaths![0], // İlk resmi gösteriyoruz
                             fit: BoxFit.contain,
                             loadingBuilder: (context, child, loadingProgress) {
                               if (loadingProgress == null) return child;
@@ -341,7 +348,7 @@ class _SpecialForYouWiew extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          products?.productName ?? '',
+                          products.productName ?? '',
                           style: TextStyle(
                               fontSize: maxHeight * 0.03,
                               fontWeight: FontWeight.bold),
@@ -350,7 +357,7 @@ class _SpecialForYouWiew extends StatelessWidget {
                           height: maxHeight * 0.02,
                         ),
                         Text(
-                          products?.productExplanation ?? '',
+                          products.productExplanation ?? '',
                           overflow: TextOverflow.clip,
                           maxLines: maxWidth < 380 ? 2 : 3,
                           softWrap: maxWidth < 380 ? false : true,
@@ -383,7 +390,7 @@ class _SpecialForYouWiew extends StatelessWidget {
                                 width:
                                     MediaQuery.of(context).size.height * 0.015),
                             Text(
-                              '${(products?.price)?.toStringAsFixed(3)} ₺',
+                              '${(products.price)?.toStringAsFixed(3)} ₺',
                               style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: maxHeight * 0.015),
@@ -435,7 +442,7 @@ class _PopularProductsTitleView extends StatelessWidget {
 class _PopularProductsListView extends StatelessWidget {
   final double maxWidth;
   final double maxHeight;
-  final Products? products;
+  final Products products;
   final Function addToCartButtonPressed;
 
   const _PopularProductsListView({
@@ -448,6 +455,7 @@ class _PopularProductsListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final favorites = Provider.of<Favorites>(context);
     return Padding(
       padding: context.horizontalPaddingLow,
       child: InkWell(
@@ -458,6 +466,7 @@ class _PopularProductsListView extends StatelessWidget {
               MaterialPageRoute(
                   builder: (context) => ProductDetailView(
                         product: products,
+                        favorites: favorites,
                       )));
         },
         child: Card(
@@ -472,10 +481,10 @@ class _PopularProductsListView extends StatelessWidget {
                   aspectRatio: maxWidth < 380 ? 12 / 10 : 12 / 8,
                   child: Padding(
                     padding: context.paddingLow,
-                    child: products?.imagePaths != null &&
-                            products!.imagePaths!.isNotEmpty
+                    child: products.imagePaths != null &&
+                            products.imagePaths!.isNotEmpty
                         ? Image.network(
-                            products!.imagePaths![0], // İlk resmi gösteriyoruz
+                            products.imagePaths![0], // İlk resmi gösteriyoruz
                             fit: BoxFit.contain,
                           )
                         : Container(),
@@ -492,7 +501,7 @@ class _PopularProductsListView extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          products?.productName ?? '',
+                          products.productName ?? '',
                           style: TextStyle(
                               fontSize: maxHeight * 0.03,
                               fontWeight: FontWeight.bold),
@@ -501,7 +510,7 @@ class _PopularProductsListView extends StatelessWidget {
                           height: maxHeight * 0.02,
                         ),
                         Text(
-                          products?.productExplanation ?? '',
+                          products.productExplanation ?? '',
                           overflow: TextOverflow.clip,
                           maxLines: maxWidth < 380 ? 1 : 2,
                           softWrap: maxWidth < 380 ? false : true,
@@ -536,7 +545,7 @@ class _PopularProductsListView extends StatelessWidget {
                                     MediaQuery.of(context).size.height * 0.01),
                             Expanded(
                               child: Text(
-                                '${(products?.price)?.toStringAsFixed(3)} ₺',
+                                '${(products.price)?.toStringAsFixed(3)} ₺',
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: maxHeight * 0.015),

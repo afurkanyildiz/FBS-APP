@@ -15,13 +15,29 @@ class ShoppingCartScreen extends StatefulWidget {
 }
 
 class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
+  @override
+  void initState() {
+    super.initState();
+    final cart = Provider.of<Cart>(context, listen: false);
+    cart.loadCartFromFirestore().then((_) {
+      setState(() {});
+    });
+  }
+
   List<Map<String, dynamic>> cartItems = [];
 
   @override
   Widget build(BuildContext context) {
     final Cart cart = Provider.of<Cart>(context);
-    void addToCartButtonPressed(Products products) {
+    void removeToCartButtonPressed(Products products) {
       cart.removeFromCart(products);
+    }
+
+    Future<void> _refreshPage() async {
+      await cart.loadCartFromFirestore();
+      setState(() {});
+
+      print('Refreshing');
     }
 
     final size = MediaQuery.of(context).size;
@@ -58,131 +74,135 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
           ),
         ],
       ),
-      body: Consumer<Cart>(
-        builder: (context, cart, _) {
-          return ListView.builder(
-            itemCount: cart.items.length,
-            itemBuilder: (BuildContext context, int index) {
-              final cartItem = cart.items[index];
-              final product = cartItem.product;
+      body: RefreshIndicator(
+        onRefresh: _refreshPage,
+        child: Consumer<Cart>(
+          builder: (context, cart, _) {
+            return ListView.builder(
+              itemCount: cart.items.length,
+              itemBuilder: (BuildContext context, int index) {
+                final cartItem = cart.items[index];
+                final product = cartItem.product;
 
-              return Padding(
-                padding: context.onlyTopPaddingLow,
-                child: Card(
-                  shape: BeveledRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  elevation: 5,
-                  child: Padding(
-                    padding: context.onlyLeftPaddingLow,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Container(
-                          height: maxHeight * 0.1,
-                          width: maxWidth < 400
-                              ? maxWidth * 0.20
-                              : maxWidth * 0.25,
-                          child: product.imagePaths != null &&
-                                  product.imagePaths!.isNotEmpty
-                              ? Image.network(
-                                  product
-                                      .imagePaths![0], // İlk resmi gösteriyoruz
-                                  fit: BoxFit.contain,
-                                  loadingBuilder:
-                                      (context, child, loadingProgress) {
-                                    if (loadingProgress == null) return child;
-                                    return Center(
-                                      child: CircularProgressIndicator(),
-                                    );
-                                  },
-                                )
-                              : Container(),
-                        ),
-                        SizedBox(width: maxWidth * .03),
-                        Container(
-                          width: maxWidth * .34,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                product.productName ?? '',
-                                style: TextStyle(
-                                  fontSize: maxWidth * 0.05,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                '${(product.price ?? 0).toString()} ₺',
-                                style: TextStyle(fontSize: maxHeight * 0.022),
-                              ),
-                              Row(
-                                children: [
-                                  IconButton(
-                                    onPressed: () {
-                                      if (cartItem.quantity > 1) {
-                                        cart.decreaseQuantity(cartItem);
-                                      }
+                return Padding(
+                  padding: context.onlyTopPaddingLow,
+                  child: Card(
+                    shape: BeveledRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    elevation: 5,
+                    child: Padding(
+                      padding: context.onlyLeftPaddingLow,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Container(
+                            height: maxHeight * 0.1,
+                            width: maxWidth < 400
+                                ? maxWidth * 0.20
+                                : maxWidth * 0.25,
+                            child: product.imagePaths != null &&
+                                    product.imagePaths!.isNotEmpty
+                                ? Image.network(
+                                    product.imagePaths![
+                                        0], // İlk resmi gösteriyoruz
+                                    fit: BoxFit.contain,
+                                    loadingBuilder:
+                                        (context, child, loadingProgress) {
+                                      if (loadingProgress == null) return child;
+                                      return Center(
+                                        child: CircularProgressIndicator(),
+                                      );
                                     },
-                                    icon: Icon(
-                                      Icons.remove,
-                                      size: maxWidth < 500
-                                          ? maxWidth * 0.035
-                                          : maxWidth * 0.04,
-                                    ),
-                                  ),
-                                  Text(
-                                    cartItem.quantity.toString(),
-                                    style: TextStyle(
-                                      fontSize: maxWidth < 500
-                                          ? maxWidth * 0.035
-                                          : maxWidth * 0.04,
-                                    ),
-                                  ),
-                                  IconButton(
-                                    onPressed: () {
-                                      if (cartItem.quantity < cartItem.stock) {
-                                        cart.increaseQuantity(cartItem);
-                                      }
-                                    },
-                                    icon: Icon(
-                                      Icons.add,
-                                      size: maxWidth < 500
-                                          ? maxWidth * 0.035
-                                          : maxWidth * 0.04,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                                  )
+                                : Container(),
                           ),
-                        ),
-                        SizedBox(
-                          width: maxHeight * .07,
-                        ),
-                        Container(
-                          alignment: Alignment.topCenter,
-                          height: maxHeight * 0.05,
-                          width: maxWidth * 0.15,
-                          child: IconButton(
-                            onPressed: () {
-                              addToCartButtonPressed(product);
-                            },
-                            icon: Icon(
-                              Icons.delete_outline,
-                              size: maxHeight * 0.04,
+                          SizedBox(width: maxWidth * .03),
+                          Container(
+                            width: maxWidth * .34,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  product.productName ?? '',
+                                  style: TextStyle(
+                                    fontSize: maxWidth * 0.05,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  '${(product.price ?? 0).toString()} ₺',
+                                  style: TextStyle(fontSize: maxHeight * 0.022),
+                                ),
+                                Row(
+                                  children: [
+                                    IconButton(
+                                      onPressed: () {
+                                        if (cartItem.quantity > 1) {
+                                          cart.decreaseQuantity(cartItem);
+                                        }
+                                      },
+                                      icon: Icon(
+                                        Icons.remove,
+                                        size: maxWidth < 500
+                                            ? maxWidth * 0.035
+                                            : maxWidth * 0.04,
+                                      ),
+                                    ),
+                                    Text(
+                                      cartItem.quantity.toString(),
+                                      style: TextStyle(
+                                        fontSize: maxWidth < 500
+                                            ? maxWidth * 0.035
+                                            : maxWidth * 0.04,
+                                      ),
+                                    ),
+                                    IconButton(
+                                      onPressed: () {
+                                        if (cartItem.quantity <
+                                            cartItem.stock) {
+                                          cart.increaseQuantity(cartItem);
+                                        }
+                                      },
+                                      icon: Icon(
+                                        Icons.add,
+                                        size: maxWidth < 500
+                                            ? maxWidth * 0.035
+                                            : maxWidth * 0.04,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
                           ),
-                        ),
-                      ],
+                          SizedBox(
+                            width: maxHeight * .07,
+                          ),
+                          Container(
+                            alignment: Alignment.topCenter,
+                            height: maxHeight * 0.05,
+                            width: maxWidth * 0.15,
+                            child: IconButton(
+                              onPressed: () {
+                                removeToCartButtonPressed(product);
+                              },
+                              icon: Icon(
+                                Icons.delete_outline,
+                                size: maxHeight * 0.04,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              );
-            },
-          );
-        },
+                );
+              },
+            );
+          },
+        ),
       ),
       bottomNavigationBar: Padding(
         padding: context.onlyBottomPaddingMedium,

@@ -52,6 +52,7 @@ class Cart extends ChangeNotifier {
       loadCartFromFirestore().then((cartItems) {
         _items = cartItems;
         notifyListeners();
+        // ignore: inference_failure_on_untyped_parameter
       }).catchError((error) {
         print('Hata: $error');
       });
@@ -87,16 +88,16 @@ class Cart extends ChangeNotifier {
             .indexWhere((item) => item.product.id == existingItem.product.id);
         if (index != -1) {
           _items[index].quantity += item.quantity;
-          updateCartItemInFirestore(
-              _items[index]); // Update the item in Firestore
+          // updateCartItemInFirestore(
+          //     _items[index]); // Update the item in Firestore
           notifyListeners();
         }
       } else {
         cartItemDoc.set(item.toJson());
         _items.add(item);
-        notifyListeners();
+        print('Added');
       }
-
+      notifyListeners();
       await updateCartInFirestore(); // Update the cart in Firestore
     } else {
       print('User is not logged in');
@@ -170,6 +171,18 @@ class Cart extends ChangeNotifier {
         return CartItem(product: product, quantity: data['quantity'] as int);
       }).toList();
 
+      final List<CartItem> newItems = [];
+      for (final newItem in cartItems) {
+        final existingItem = _items.firstWhere(
+          (item) => item.product.id == newItem.product.id,
+          orElse: () => CartItem(product: Products(stock: 0), quantity: 4),
+        );
+        if (existingItem.product.id == null) {
+          newItems.add(newItem);
+        }
+      }
+      _items.addAll(newItems);
+      notifyListeners();
       return cartItems;
     }
     return [];
@@ -177,6 +190,7 @@ class Cart extends ChangeNotifier {
 
   void increaseQuantity(CartItem cartItem) {
     final stock = cartItem.product.stock;
+    // ignore: unnecessary_null_comparison
     if (stock != null && cartItem.quantity < stock) {
       cartItem.quantity++;
       updateCartItemInFirestore(cartItem); // Update the item in Firestore

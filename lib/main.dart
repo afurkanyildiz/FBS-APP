@@ -2,14 +2,16 @@ import 'package:firat_bilgisayar_sistemleri/feature/home/home.dart';
 import 'package:firat_bilgisayar_sistemleri/product/constants/string.dart';
 import 'package:firat_bilgisayar_sistemleri/product/initialize/application_start.dart';
 import 'package:firat_bilgisayar_sistemleri/product/models/cart.dart';
+import 'package:firat_bilgisayar_sistemleri/product/models/favorites.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
   await ApplicationStart.init();
-  runApp(MultiProvider(
-      providers: [ChangeNotifierProvider<Cart>(create: (_) => Cart())],
-      child: MyApp()));
+  runApp(MultiProvider(providers: [
+    ChangeNotifierProvider<Cart>(create: (_) => Cart()),
+    ChangeNotifierProvider<Favorites>(create: (_) => Favorites())
+  ], child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
