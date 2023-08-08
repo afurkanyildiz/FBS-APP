@@ -51,3 +51,20 @@ class FavoriteTitleText extends StatelessWidget {
     );
   }
 }
+
+class MainTitleText extends StatelessWidget {
+  const MainTitleText({required this.value, super.key});
+
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      value,
+      style: TextStyle(
+          fontSize: MediaQuery.of(context).size.height * 0.022,
+          fontWeight: FontWeight.bold,
+          color: Colors.white),
+    );
+  }
+}

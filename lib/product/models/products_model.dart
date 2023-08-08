@@ -10,7 +10,8 @@ class Products extends Equatable with IdModel, BaseFirebaseModel<Products> {
     this.technicalDetails,
     this.categories,
     this.price,
-    this.rating,
+    this.total_rating,
+    this.total_votes,
     this.quantity,
     required this.stock,
     this.id,
@@ -22,7 +23,8 @@ class Products extends Equatable with IdModel, BaseFirebaseModel<Products> {
   final Map<String, dynamic>? technicalDetails;
   final String? categories;
   final double? price;
-  final double? rating;
+  final int? total_rating;
+  final int? total_votes;
   final int? quantity;
   final int stock;
   final String? id;
@@ -37,7 +39,8 @@ class Products extends Equatable with IdModel, BaseFirebaseModel<Products> {
         technicalDetails,
         categories,
         price,
-        rating,
+        total_rating,
+        total_votes,
         quantity,
         stock,
         id
@@ -51,7 +54,8 @@ class Products extends Equatable with IdModel, BaseFirebaseModel<Products> {
     Map<String, dynamic>? technicalDetails,
     String? categories,
     double? price,
-    double? rating,
+    int? total_rating,
+    int? total_votes,
     int? quantity,
     int? stock,
     String? id,
@@ -64,7 +68,8 @@ class Products extends Equatable with IdModel, BaseFirebaseModel<Products> {
       technicalDetails: technicalDetails ?? this.technicalDetails,
       categories: categories ?? this.categories,
       price: price ?? this.price,
-      rating: rating ?? this.rating,
+      total_rating: total_rating ?? this.total_rating,
+      total_votes: total_votes ?? this.total_votes,
       quantity: quantity ?? this.quantity,
       stock: stock ?? this.stock,
       id: id ?? this.id,
@@ -80,7 +85,8 @@ class Products extends Equatable with IdModel, BaseFirebaseModel<Products> {
       'technicalDetails': technicalDetails,
       'categories': categories,
       'price': price,
-      'rating': rating,
+      'total_rating': total_rating,
+      'total_votes': total_votes,
       'quantity': quantity,
       'stock': stock,
       'id': id,
@@ -107,9 +113,12 @@ class Products extends Equatable with IdModel, BaseFirebaseModel<Products> {
           ? null
           : double.tryParse(json['price'].toString()),
       // rating: json['rating'] as String?,
-      rating: json['rating'] == null
+      total_rating: json['total_rating'] == null
           ? null
-          : double.tryParse(json['rating'].toString()),
+          : int.tryParse(json['total_rating'].toString()),
+      total_votes: json['total_votes'] == null
+          ? null
+          : int.tryParse(json['total_votes'].toString()),
       quantity: json['quantity'] == null
           ? null
           : int.tryParse(json['quantity'].toString()),

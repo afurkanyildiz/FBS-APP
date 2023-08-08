@@ -22,6 +22,14 @@ class FavoritesItem {
     return product.price;
   }
 
+  int? get total_rating {
+    return product.total_rating;
+  }
+
+  int? get total_votes {
+    return product.total_votes;
+  }
+
   int get stock {
     return product.stock;
   }
@@ -139,6 +147,7 @@ class Favorites extends ChangeNotifier {
           .collection('favorites');
 
       _favoritesSubscription = pageCollection.snapshots().listen((snapshot) {
+        // ignore: unused_local_variable
         final updatedItems = snapshot.docs.map((doc) {
           final data = doc.data() as Map<String, dynamic>;
           final productData = data['product'] as Map<String, dynamic>;

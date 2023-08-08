@@ -14,7 +14,7 @@ import 'package:firat_bilgisayar_sistemleri/product/widget/text/subtitle_text.da
 import 'package:provider/provider.dart';
 import '../../product/constants/padding.dart';
 
-import '../../product/models/cart.dart';
+import '../../product/utility/utils.dart';
 import '../../product/widget/card/store_view_small_card.dart';
 
 class StoreView extends StatefulWidget {
@@ -44,29 +44,8 @@ class _StoreViewState extends State<StoreView> {
       return value.toJson();
     }).get();
 
-    final Cart cart = Cart();
     // ignore: omit_local_variable_types, unused_local_variable
     final Favorites favorites = Favorites();
-
-    void addToCartButtonPressed(Products products) {
-      final cartItem = CartItem(product: products, quantity: 1);
-      cart.addToCart(cartItem);
-
-      // ignore: unused_local_variable
-      List<Map<String, dynamic>> cartItems = [];
-
-      setState(() {
-        cartItems = cart.items.map((cartItem) {
-          final product = cartItem.product;
-
-          return {
-            'productName': product.productName,
-            'price': product.price,
-            'quantity': cartItem.quantity,
-          };
-        }).toList();
-      });
-    }
 
     final size = MediaQuery.of(context).size;
     final maxWidth = size.width;
@@ -86,15 +65,21 @@ class _StoreViewState extends State<StoreView> {
                 Icons.notifications_none_outlined,
                 color: Colors.black,
               )),
-          Padding(
-            padding: EdgeInsets.only(right: maxWidth * 0.02),
-            child: CircleAvatar(
-              radius: MediaQuery.of(context).size.height * 0.03,
-              backgroundColor: ColorConstants.technicalServiceIcon,
-              child: Icon(
-                Icons.person,
-                color: Colors.white,
-                size: MediaQuery.of(context).size.height * 0.03,
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                  context, MaterialPageRoute(builder: (context) => ShowMenu()));
+            },
+            child: Padding(
+              padding: EdgeInsets.only(right: maxWidth * 0.02),
+              child: CircleAvatar(
+                radius: MediaQuery.of(context).size.height * 0.03,
+                backgroundColor: ColorConstants.technicalServiceIcon,
+                child: Icon(
+                  Icons.person,
+                  color: Colors.white,
+                  size: MediaQuery.of(context).size.height * 0.03,
+                ),
               ),
             ),
           ),
@@ -114,6 +99,7 @@ class _StoreViewState extends State<StoreView> {
               if (snapshot.hasData) {
                 final values =
                     snapshot.data!.docs.map((e) => e.data()).toList();
+
                 return Container(
                   height: maxHeight - kToolbarHeight,
                   width: maxWidth,
@@ -142,7 +128,6 @@ class _StoreViewState extends State<StoreView> {
                                 maxWidth: maxWidth,
                                 maxHeight: maxHeight,
                                 products: values[index],
-                                addToCartButtonPressed: addToCartButtonPressed,
                               );
                             },
                           ),
@@ -158,7 +143,6 @@ class _StoreViewState extends State<StoreView> {
                                 maxWidth: maxWidth,
                                 maxHeight: maxHeight,
                                 products: values[index],
-                                addToCartButtonPressed: addToCartButtonPressed,
                               );
                             },
                           ),
@@ -284,19 +268,20 @@ class _SpecialForYouWiew extends StatelessWidget {
   final double maxWidth;
   final double maxHeight;
   final Products products;
-  final Function addToCartButtonPressed;
 
   const _SpecialForYouWiew({
     Key? key,
     required this.maxWidth,
     required this.maxHeight,
     required this.products,
-    required this.addToCartButtonPressed,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final favorites = Provider.of<Favorites>(context);
+    final totalRating = products.total_rating ?? 0;
+    final totalVotes = products.total_votes ?? 0;
+    final averageRating = totalRating / totalVotes;
     return Padding(
       padding: context.horizontalPaddingLow,
       child: InkWell(
@@ -311,6 +296,7 @@ class _SpecialForYouWiew extends StatelessWidget {
                       )));
         },
         child: Card(
+          color: ColorConstants.textfieldWhite,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20.0),
             side: BorderSide(color: Colors.grey, width: 1),
@@ -327,12 +313,6 @@ class _SpecialForYouWiew extends StatelessWidget {
                         ? Image.network(
                             products.imagePaths![0], // İlk resmi gösteriyoruz
                             fit: BoxFit.contain,
-                            loadingBuilder: (context, child, loadingProgress) {
-                              if (loadingProgress == null) return child;
-                              return Center(
-                                child: CircularProgressIndicator(),
-                              );
-                            },
                           )
                         : Container(),
                   ),
@@ -353,13 +333,17 @@ class _SpecialForYouWiew extends StatelessWidget {
                               fontSize: maxHeight * 0.03,
                               fontWeight: FontWeight.bold),
                         ),
-                        SizedBox(
-                          height: maxHeight * 0.02,
+                        Row(
+                          children: [
+                            buildRatingStarts(averageRating, maxHeight),
+                            Text('(${averageRating.toStringAsFixed(1)})',
+                                style: TextStyle(fontSize: maxHeight * 0.016))
+                          ],
                         ),
                         Text(
                           products.productExplanation ?? '',
                           overflow: TextOverflow.clip,
-                          maxLines: maxWidth < 380 ? 2 : 3,
+                          maxLines: maxWidth < 380 ? 1 : 2,
                           softWrap: maxWidth < 380 ? false : true,
                           style: TextStyle(
                               fontSize: maxHeight * 0.02,
@@ -369,10 +353,11 @@ class _SpecialForYouWiew extends StatelessWidget {
                           height: maxHeight * 0.01,
                         ),
                         Row(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             OutlinedButton(
                               onPressed: () {
-                                addToCartButtonPressed(products);
+                                addToCartButtonPressed(context, products);
                               },
                               child: Text('Sepete Ekle',
                                   style: TextStyle(fontSize: maxHeight * 0.02),
@@ -388,12 +373,14 @@ class _SpecialForYouWiew extends StatelessWidget {
                             ),
                             SizedBox(
                                 width:
-                                    MediaQuery.of(context).size.height * 0.015),
-                            Text(
-                              '${(products.price)?.toStringAsFixed(3)} ₺',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: maxHeight * 0.015),
+                                    MediaQuery.of(context).size.height * 0.01),
+                            Expanded(
+                              child: Text(
+                                '${(products.price)?.toStringAsFixed(3)} ₺',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: maxHeight * 0.014),
+                              ),
                             )
                           ],
                         )
@@ -443,19 +430,20 @@ class _PopularProductsListView extends StatelessWidget {
   final double maxWidth;
   final double maxHeight;
   final Products products;
-  final Function addToCartButtonPressed;
 
   const _PopularProductsListView({
     Key? key,
     required this.maxWidth,
     required this.maxHeight,
     required this.products,
-    required this.addToCartButtonPressed,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final favorites = Provider.of<Favorites>(context);
+    final totalRating = products.total_rating ?? 0;
+    final totalVotes = products.total_votes ?? 0;
+    final averageRating = totalRating / totalVotes;
     return Padding(
       padding: context.horizontalPaddingLow,
       child: InkWell(
@@ -470,6 +458,7 @@ class _PopularProductsListView extends StatelessWidget {
                       )));
         },
         child: Card(
+          color: ColorConstants.textfieldWhite,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20.0),
             side: BorderSide(color: Colors.grey, width: 1),
@@ -506,8 +495,12 @@ class _PopularProductsListView extends StatelessWidget {
                               fontSize: maxHeight * 0.03,
                               fontWeight: FontWeight.bold),
                         ),
-                        SizedBox(
-                          height: maxHeight * 0.02,
+                        Row(
+                          children: [
+                            buildRatingStarts(averageRating, maxHeight),
+                            Text('(${averageRating.toStringAsFixed(1)})',
+                                style: TextStyle(fontSize: maxHeight * 0.016))
+                          ],
                         ),
                         Text(
                           products.productExplanation ?? '',
@@ -526,7 +519,7 @@ class _PopularProductsListView extends StatelessWidget {
                           children: [
                             OutlinedButton(
                               onPressed: () {
-                                addToCartButtonPressed(products);
+                                addToCartButtonPressed(context, products);
                               },
                               child: Text('Sepete Ekle',
                                   style: TextStyle(fontSize: maxHeight * 0.02),
@@ -548,7 +541,7 @@ class _PopularProductsListView extends StatelessWidget {
                                 '${(products.price)?.toStringAsFixed(3)} ₺',
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    fontSize: maxHeight * 0.015),
+                                    fontSize: maxHeight * 0.014),
                               ),
                             )
                           ],

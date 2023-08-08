@@ -1,7 +1,5 @@
-import 'dart:async';
 import 'package:firat_bilgisayar_sistemleri/feature/auth/sign_up.dart';
-import 'package:firat_bilgisayar_sistemleri/feature/home/home.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firat_bilgisayar_sistemleri/product/service/auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -17,8 +15,22 @@ class SignIn extends ConsumerStatefulWidget {
 }
 
 class _SignInState extends ConsumerState<SignIn> {
-  TextEditingController _passwordTextController = TextEditingController();
-  TextEditingController _emailTextController = TextEditingController();
+  late TextEditingController _passwordTextController;
+  late TextEditingController _emailTextController;
+
+  @override
+  void initState() {
+    super.initState();
+    _passwordTextController = TextEditingController();
+    _emailTextController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _passwordTextController.dispose();
+    _emailTextController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,21 +74,11 @@ class _SignInState extends ConsumerState<SignIn> {
         reusableTextField(
             "Sifre Giriniz", Icons.lock_outline, true, _passwordTextController),
         SizedBox(height: 20),
-        signInSignUpButton(context, true, () {
-          FirebaseAuth.instance
-              .signInWithEmailAndPassword(
-                  email: _emailTextController.text,
-                  password: _passwordTextController.text)
-              .then((value) {
-            Navigator.pushReplacement(
-                context,
-                // ignore: inference_failure_on_instance_creation
-                MaterialPageRoute(builder: (context) => OrientationPage()));
-          }).onError((error, stackTrace) {
-            print("Error ${error.toString()}");
-          });
-        }),
-        signUpOption()
+        signUpOption(),
+        ElevatedButton(
+            onPressed: () =>
+                signIn(context, _emailTextController, _passwordTextController),
+            child: Text('Giris Yap')),
       ],
     );
   }

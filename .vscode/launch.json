@@ -1,0 +1,31 @@
+{
+    // Olası öznitelikler hakkında bilgi edinmek için IntelliSense kullanın.
+    // Mevcut özniteliklerin açıklamalarını görüntülemek için üzerine gelin.
+    // Daha fazla bilgi için şu adresi ziyaret edin: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "firat-bilgisayar-sistemleri",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "firat-bilgisayar-sistemleri (profile mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "firat-bilgisayar-sistemleri (release mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "Flutter (iPhone 14 Pro Max)",
+            "request": "launch",
+            "type": "dart",
+            "deviceId": "iphone 14 pro max"
+        }
+    ]
+}

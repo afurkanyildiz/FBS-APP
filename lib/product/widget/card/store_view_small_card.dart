@@ -45,26 +45,3 @@ class SmallCardView extends StatelessWidget {
     );
   }
 }
-
-
-
-// Increase Product
-//  IconButton(
-//                             onPressed: () {
-//                               setState(() {
-//                                 if (widget.product.count > 0) {
-//                                   widget.product.count--;
-//                                 }
-//                               });
-//                             },
-//                             icon: Icon(Icons.remove),
-//                           ),
-//                           Text(widget.product.count.toString()),
-//                           IconButton(
-//                             onPressed: () {
-//                               setState(() {
-//                                 widget.product.count++;
-//                               });
-//                             },
-//                             icon: Icon(Icons.add),
-//                           ),

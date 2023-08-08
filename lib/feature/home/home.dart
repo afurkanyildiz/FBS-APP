@@ -1,4 +1,7 @@
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:firat_bilgisayar_sistemleri/feature/auth/sign_in.dart';
+import 'package:firat_bilgisayar_sistemleri/product/widget/text/title_text.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../../product/constants/colors.dart';
 import '../../product/constants/images.dart';
@@ -45,7 +48,9 @@ class _OrientationPageState extends State<OrientationPage>
 
   AppBar AppBarItems() {
     return AppBar(
-      title: Text("Fırat Bilgisayar Sistemleri"),
+      title: MainTitleText(
+        value: 'Fırat Bilgisayar Sistemleri',
+      ),
       flexibleSpace: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -61,7 +66,14 @@ class _OrientationPageState extends State<OrientationPage>
       actions: [
         MaterialButton(
           child: Icon(Icons.logout, color: Colors.white),
-          onPressed: () {},
+          onPressed: () async {
+            FirebaseAuth _auth = FirebaseAuth.instance;
+            if (_auth.currentUser != null) {
+              await _auth.signOut();
+              Navigator.push(
+                  context, MaterialPageRoute(builder: (context) => SignIn()));
+            }
+          },
         ),
       ],
     );
@@ -94,7 +106,11 @@ class ButtonItems extends StatelessWidget with NavigatorManager {
             onPressed: () {
               navigateToWidget(context, StoreScreenView());
             },
-            icon: Icon(Icons.store, size: 40.0),
+            icon: Icon(
+              Icons.store,
+              size: 40.0,
+              color: ColorConstants.textfieldWhite,
+            ),
             label: Text(
               'Magaza',
               style: Theme.of(context)
@@ -120,6 +136,7 @@ class ButtonItems extends StatelessWidget with NavigatorManager {
             icon: Icon(
               Icons.repartition_rounded,
               size: 40.0,
+              color: ColorConstants.textfieldWhite,
             ),
             label: Text(
               'Teknik Servis',

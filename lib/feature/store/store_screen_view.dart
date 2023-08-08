@@ -63,43 +63,47 @@ class StoreBottomAppBarView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BottomAppBar(
-      surfaceTintColor: ColorConstants.colorsBlack,
-      notchMargin: 10,
+      color: Colors.white,
+      surfaceTintColor: Colors.white,
+      // notchMargin: 20,
       shape: CircularNotchedRectangle(),
-      child: TabBar(indicatorSize: TabBarIndicatorSize.label, tabs: [
-        Tab(
-          height: MediaQuery.of(context).size.height * 0.05,
-          icon: Icon(
-            Icons.home,
-            color: ColorConstants.technicalServiceIcon,
-            size: MediaQuery.of(context).size.height * 0.03,
-          ),
-        ),
-        Tab(
-          height: MediaQuery.of(context).size.height * 0.05,
-          icon: Icon(
-            Icons.search,
-            color: ColorConstants.technicalServiceIcon,
-            size: MediaQuery.of(context).size.height * 0.03,
-          ),
-        ),
-        Tab(
-          height: MediaQuery.of(context).size.height * 0.05,
-          icon: Icon(
-            Icons.favorite,
-            color: ColorConstants.technicalServiceIcon,
-            size: MediaQuery.of(context).size.height * 0.03,
-          ),
-        ),
-        Tab(
-          height: MediaQuery.of(context).size.height * 0.05,
-          icon: Icon(
-            Icons.shopping_cart,
-            color: ColorConstants.technicalServiceIcon,
-            size: MediaQuery.of(context).size.height * 0.03,
-          ),
-        ),
-      ]),
+      child: TabBar(
+          indicatorSize: TabBarIndicatorSize.label,
+          indicatorColor: Colors.transparent,
+          tabs: [
+            Tab(
+              height: MediaQuery.of(context).size.height * 0.05,
+              icon: Icon(
+                Icons.home,
+                color: ColorConstants.technicalServiceIcon,
+                size: MediaQuery.of(context).size.height * 0.03,
+              ),
+            ),
+            Tab(
+              height: MediaQuery.of(context).size.height * 0.05,
+              icon: Icon(
+                Icons.search,
+                color: ColorConstants.technicalServiceIcon,
+                size: MediaQuery.of(context).size.height * 0.03,
+              ),
+            ),
+            Tab(
+              height: MediaQuery.of(context).size.height * 0.05,
+              icon: Icon(
+                Icons.favorite,
+                color: ColorConstants.technicalServiceIcon,
+                size: MediaQuery.of(context).size.height * 0.03,
+              ),
+            ),
+            Tab(
+              height: MediaQuery.of(context).size.height * 0.05,
+              icon: Icon(
+                Icons.shopping_cart,
+                color: ColorConstants.technicalServiceIcon,
+                size: MediaQuery.of(context).size.height * 0.03,
+              ),
+            ),
+          ]),
     );
   }
 }
@@ -114,7 +118,10 @@ class StoreFloatingActionButtonView extends StatelessWidget {
     return FloatingActionButton(
       onPressed: () => Navigator.pop(context),
       backgroundColor: ColorConstants.technicalServiceIcon,
-      child: Icon(Icons.view_stream),
+      child: Icon(
+        Icons.view_stream,
+        color: ColorConstants.textfieldWhite,
+      ),
       shape: CircleBorder(),
       heroTag: null,
       clipBehavior: Clip.none,

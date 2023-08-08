@@ -5,6 +5,7 @@ import 'package:kartal/kartal.dart';
 import 'package:provider/provider.dart';
 
 import '../../product/constants/colors.dart';
+import '../../product/utility/utils.dart';
 import '../../product/widget/text/title_text.dart';
 
 class FavoritesWiew extends StatefulWidget {
@@ -30,14 +31,6 @@ class _FavoritesWiewState extends State<FavoritesWiew> {
   Widget build(BuildContext context) {
     // ignore: unused_local_variable
     final favorites = Provider.of<Favorites>(context);
-
-    // Future<void> _refreshPage() async {
-    //   favorites.loadFavoritesFromFirestore().then((_) {
-    //     setState(() {});
-    //   });
-
-    //   print('Refreshing');
-    // }
 
     Future<void> _refreshPage() async {
       favorites.stopListeningToFirestore();
@@ -67,15 +60,21 @@ class _FavoritesWiewState extends State<FavoritesWiew> {
               color: Colors.black,
             ),
           ),
-          Padding(
-            padding: EdgeInsets.only(right: maxWidth * 0.02),
-            child: CircleAvatar(
-              radius: MediaQuery.of(context).size.height * 0.03,
-              backgroundColor: ColorConstants.technicalServiceIcon,
-              child: Icon(
-                Icons.person,
-                color: Colors.white,
-                size: MediaQuery.of(context).size.height * 0.03,
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                  context, MaterialPageRoute(builder: (context) => ShowMenu()));
+            },
+            child: Padding(
+              padding: EdgeInsets.only(right: maxWidth * 0.02),
+              child: CircleAvatar(
+                radius: MediaQuery.of(context).size.height * 0.03,
+                backgroundColor: ColorConstants.technicalServiceIcon,
+                child: Icon(
+                  Icons.person,
+                  color: Colors.white,
+                  size: MediaQuery.of(context).size.height * 0.03,
+                ),
               ),
             ),
           ),
@@ -90,9 +89,16 @@ class _FavoritesWiewState extends State<FavoritesWiew> {
                 final pageItem = favorites.items[index];
                 final product = pageItem.product;
 
+                final isFavorite = favorites.isFavorite(product);
+
+                final totalRating = product.total_rating ?? 0;
+                final totalVotes = product.total_votes ?? 0;
+                final averageRating = totalRating / totalVotes;
+
                 return Padding(
                   padding: context.onlyTopPaddingLow,
                   child: Card(
+                    color: Colors.white,
                     shape: BeveledRectangleBorder(
                       borderRadius: BorderRadius.circular(15),
                     ),
@@ -138,23 +144,56 @@ class _FavoritesWiewState extends State<FavoritesWiew> {
                             ),
                             SizedBox(width: maxWidth * .03),
                             Container(
-                              width: maxWidth * .34,
+                              width: maxWidth * .44,
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    product.productName ?? '',
+                                    product.productExplanation ?? '',
+                                    overflow: TextOverflow.clip,
+                                    maxLines: maxWidth < 380 ? 1 : 2,
+                                    softWrap: maxWidth < 380 ? false : true,
                                     style: TextStyle(
-                                      fontSize: maxWidth * 0.05,
-                                      fontWeight: FontWeight.bold,
+                                      fontSize: maxWidth * 0.04,
                                     ),
                                   ),
                                   Text(
                                     '${(product.price ?? 0).toString()} ₺',
-                                    style:
-                                        TextStyle(fontSize: maxHeight * 0.022),
+                                    style: TextStyle(
+                                        fontSize: maxHeight * 0.022,
+                                        fontWeight: FontWeight.bold),
                                   ),
+                                  Row(
+                                    children: [
+                                      buildRatingStarts(
+                                          averageRating, maxHeight),
+                                      Text(
+                                          '(${averageRating.toStringAsFixed(1)})',
+                                          style: TextStyle(
+                                              fontSize: maxHeight * 0.016))
+                                    ],
+                                  )
                                 ],
+                              ),
+                            ),
+                            SizedBox(width: maxWidth * .001),
+                            OutlinedButton(
+                              onPressed: () {
+                                favorites.toogleFavorite(product);
+                              },
+                              style: OutlinedButton.styleFrom(
+                                side: BorderSide(
+                                  color: Colors.transparent,
+                                ),
+                              ),
+                              child: Icon(
+                                isFavorite
+                                    ? Icons.favorite
+                                    : Icons.favorite_border,
+                                color: isFavorite
+                                    ? ColorConstants.chipColor
+                                    : null,
+                                size: maxHeight * 0.04,
                               ),
                             ),
                           ],

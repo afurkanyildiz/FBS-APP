@@ -1,3 +1,4 @@
+import 'package:firat_bilgisayar_sistemleri/product/utility/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:kartal/kartal.dart';
 import 'package:provider/provider.dart';
@@ -60,15 +61,21 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
               color: Colors.black,
             ),
           ),
-          Padding(
-            padding: EdgeInsets.only(right: maxWidth * 0.02),
-            child: CircleAvatar(
-              radius: MediaQuery.of(context).size.height * 0.03,
-              backgroundColor: ColorConstants.technicalServiceIcon,
-              child: Icon(
-                Icons.person,
-                color: Colors.white,
-                size: MediaQuery.of(context).size.height * 0.03,
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                  context, MaterialPageRoute(builder: (context) => ShowMenu()));
+            },
+            child: Padding(
+              padding: EdgeInsets.only(right: maxWidth * 0.02),
+              child: CircleAvatar(
+                radius: MediaQuery.of(context).size.height * 0.03,
+                backgroundColor: ColorConstants.technicalServiceIcon,
+                child: Icon(
+                  Icons.person,
+                  color: Colors.white,
+                  size: MediaQuery.of(context).size.height * 0.03,
+                ),
               ),
             ),
           ),
@@ -87,6 +94,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                 return Padding(
                   padding: context.onlyTopPaddingLow,
                   child: Card(
+                    color: ColorConstants.textfieldWhite,
                     shape: BeveledRectangleBorder(
                       borderRadius: BorderRadius.circular(15),
                     ),
@@ -223,7 +231,9 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
                     },
                     child: Text(
                       "Satın Al",
-                      style: TextStyle(fontSize: maxWidth * .028),
+                      style: TextStyle(
+                          fontSize: maxWidth * .028,
+                          color: ColorConstants.textfieldWhite),
                     ),
                     style: ButtonStyle(
                       fixedSize: MaterialStateProperty.all(
